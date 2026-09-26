@@ -1,0 +1,18 @@
+#usda 1.0
+(
+    "Farm digital twin root. Holds ONLY the sublayer stack; never author prims here."
+    customLayerData = {
+        string generator = "omniverse_crop_intelligence"
+        string phase = "1"
+    }
+    defaultPrim = "World"
+    metersPerUnit = 1
+    subLayers = [
+        @./RUNTIME_LYR.usda@,
+        @./SIM_LYR.usda@,
+        @./DATA_LYR.usda@,
+        @./ASS_LYR.usda@
+    ]
+    upAxis = "Z"
+)
+

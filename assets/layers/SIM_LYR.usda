@@ -1,0 +1,18 @@
+#usda 1.0
+(
+    "SIM layer - reserved for PhysX collision meshes and Isaac Sim robot assets (Phase 3)."
+    customLayerData = {
+        string generator = "omniverse_crop_intelligence"
+        string phase = "1"
+    }
+)
+
+def Xform "World"
+{
+    def Scope "Simulation" (
+        "Phase 3: author UsdPhysics collision APIs on /World/Farm/* as `over` prims here; never in ASS_LYR so scans stay pristine."
+    )
+    {
+    }
+}
+

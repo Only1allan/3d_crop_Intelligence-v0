@@ -1,0 +1,115 @@
+#usda 1.0
+(
+    "DATA layer - semantic definitions: zones, sensor identity and 3D placement."
+    customLayerData = {
+        string generator = "omniverse_crop_intelligence"
+        string phase = "1"
+    }
+)
+
+def Xform "World"
+{
+    def Scope "Zones" (
+        "One FarmZoneAPI Xform per plot / assessment site."
+    )
+    {
+        def Xform "Zone_DemoPlot" (
+            prepend apiSchemas = ["FarmZoneAPI", "CropModelStateAPI"]
+        )
+        {
+            float farmZone:areaHa = 1
+            double farmZone:centroidLatitude = -0.3031
+            double farmZone:centroidLongitude = 36.37
+            string farmZone:displayName = "Demo plot (Nyandarua, Shangi)"
+            string farmZone:externalRef = "demo-plot-uuid"
+            string farmZone:plantingDate = "2026-08-15"
+            token farmZone:source = "farmwise_plot"
+            string farmZone:variety = "Shangi"
+            string farmZone:zoneId = "Zone_DemoPlot"
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+    }
+
+    def Scope "Sensors" (
+        "One FarmSensorAPI Xform per sensing point. Transform = stage-local metres."
+    )
+    {
+        def Xform "SoilProbe_NW" (
+            prepend apiSchemas = ["FarmSensorAPI"]
+        )
+        {
+            double farmSensor:elevation = 0
+            string farmSensor:externalRef = "thing/soil-probe-nw"
+            token farmSensor:kind = "soil_probe"
+            double farmSensor:latitude = -0.3029
+            double farmSensor:longitude = 36.3698
+            string farmSensor:sensorId = "SoilProbe_NW"
+            token farmSensor:source = "aws_iot_core"
+            rel farmSensor:zone = </World/Zones/Zone_DemoPlot>
+            double3 xformOp:translate = (-20, 15, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            def Sphere "Marker"
+            {
+                float3[] extent = [(-0.25, -0.25, -0.25), (0.25, 0.25, 0.25)]
+                color3f[] primvars:displayColor = [(0.55, 0.35, 0.15)]
+                double radius = 0.25
+                double3 xformOp:translate = (0, 0, 0.25)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+
+        def Xform "WeatherStation_C" (
+            prepend apiSchemas = ["FarmSensorAPI"]
+        )
+        {
+            double farmSensor:elevation = 0
+            string farmSensor:externalRef = "snapshot-uuid"
+            token farmSensor:kind = "weather_station"
+            double farmSensor:latitude = -0.3031
+            double farmSensor:longitude = 36.37
+            string farmSensor:sensorId = "WeatherStation_C"
+            token farmSensor:source = "farmwise_snapshot"
+            rel farmSensor:zone = </World/Zones/Zone_DemoPlot>
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            def Sphere "Marker"
+            {
+                float3[] extent = [(-0.25, -0.25, -0.25), (0.25, 0.25, 0.25)]
+                color3f[] primvars:displayColor = [(0.2, 0.55, 0.95)]
+                double radius = 0.25
+                double3 xformOp:translate = (0, 0, 0.25)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+
+        def Xform "SoilAssessment_SE" (
+            prepend apiSchemas = ["FarmSensorAPI"]
+        )
+        {
+            double farmSensor:elevation = 0
+            string farmSensor:externalRef = "assessments.id=42"
+            token farmSensor:kind = "assessment_virtual"
+            double farmSensor:latitude = -0.3033
+            double farmSensor:longitude = 36.3702
+            string farmSensor:sensorId = "SoilAssessment_SE"
+            token farmSensor:soilTextureClass = "sandy_loam"
+            token farmSensor:source = "agrifusion_assessment"
+            rel farmSensor:zone = </World/Zones/Zone_DemoPlot>
+            double3 xformOp:translate = (25, -18, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            def Sphere "Marker"
+            {
+                float3[] extent = [(-0.25, -0.25, -0.25), (0.25, 0.25, 0.25)]
+                color3f[] primvars:displayColor = [(0.85, 0.65, 0.2)]
+                double radius = 0.25
+                double3 xformOp:translate = (0, 0, 0.25)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+    }
+}
+

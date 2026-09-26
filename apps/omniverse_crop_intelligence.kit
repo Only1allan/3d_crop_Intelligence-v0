@@ -1,0 +1,41 @@
+# Minimal Kit app that boots straight into the farm twin.
+# Usage (Kit SDK / kit-app-template):  kit apps/omniverse_crop_intelligence.kit
+# or copy into kit-app-template/source/apps and add exts/ to the ext folders.
+
+[package]
+title = "Omniverse Crop Intelligence"
+version = "0.1.0"
+description = "Agricultural digital twin viewer (Phase 1 foundation)."
+keywords = ["app", "agriculture", "digital twin"]
+
+[dependencies]
+"omni.kit.uiapp" = {}
+"omni.kit.renderer.core" = {}
+"omni.hydra.rtx" = {}
+"omni.kit.viewport.window" = {}
+"omni.kit.viewport.bundle" = {}
+"omni.kit.window.stage" = {}
+"omni.kit.window.property" = {}
+"omni.kit.property.usd" = {}
+"omni.kit.window.console" = {}
+"omni.kit.window.content_browser" = {}
+"omni.kit.menu.utils" = {}
+"omni.kit.menu.file" = {}
+"omni.kit.menu.edit" = {}
+"omni.kit.selection" = {}
+"omni.kit.manipulator.prim" = {}
+"omni.kit.manipulator.selection" = {}
+"omniverse_crop_intelligence" = {}
+
+[settings]
+app.window.title = "Omniverse Crop Intelligence"
+app.window.width = 1600
+app.window.height = 900
+app.content.emptyStageOnStart = false
+# Kit default is Y-up / cm. Our generated stack authors Z-up / metres and
+# wins because stage metadata comes from the opened root layer.
+exts."omniverse_crop_intelligence".autoBuildOnStartup = true
+exts."omniverse_crop_intelligence".spawnTestSensorsOnBuild = true
+
+[settings.app.exts]
+folders.'++' = ["${app}/../exts"]

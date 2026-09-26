@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+usdenv/
+_build/
+_compiler/
+_repo/
+.kit-cache/
+*.log
+# Generated at runtime by StageBuilder when the user picks a custom output dir
+/build_layers/

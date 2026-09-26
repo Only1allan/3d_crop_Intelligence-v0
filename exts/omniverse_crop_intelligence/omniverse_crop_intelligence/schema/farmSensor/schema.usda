@@ -1,0 +1,299 @@
+#usda 1.0
+(
+    """
+    Omniverse Crop Intelligence - codeless OpenUSD API schemas.
+
+    Three single-apply API schemas that attach agronomic telemetry and model
+    state to ordinary UsdGeomXform prims:
+
+      FarmSensorAPI     - one physical or virtual sensing point (soil probe,
+                          weather station, canopy probe, satellite pixel,
+                          manual assessment). Merges AgriFusion soil chemistry
+                          with FarmWise weather/satellite snapshots and adds
+                          the SUBSTOR / SimCast driver variables neither
+                          legacy project measures yet.
+      FarmZoneAPI       - one management unit (a FarmWise Plot / an AgriFusion
+                          assessment site). Sensors point at a zone through
+                          the farmSensor:zone relationship.
+      CropModelStateAPI - Phase 2 write target for SUBSTOR-Potato and SimCast
+                          outputs, applied to zone prims. Declared now so the
+                          RUNTIME layer has a typed contract to write into.
+
+    Codeless: `skipCodeGeneration = true` means no C++ build; the plugin is
+    registered at runtime from generatedSchema.usda + plugInfo.json.
+    Regenerate with:  python tools/gen_schema.py
+    """
+    subLayers = [
+        @usd/schema.usda@
+    ]
+)
+
+over "GLOBAL" (
+    customData = {
+        string libraryName = "farmSensor"
+        string libraryPath = "."
+        bool skipCodeGeneration = true
+        bool useLiteralIdentifier = true
+    }
+) {
+}
+
+# ---------------------------------------------------------------------------
+# FarmSensorAPI
+# ---------------------------------------------------------------------------
+class "FarmSensorAPI" (
+    inherits = </APISchemaBase>
+    customData = {
+        token apiSchemaType = "singleApply"
+        string className = "FarmSensorAPI"
+    }
+    doc = """A single agricultural sensing point anchored in the 3D farm scene.
+    Apply to a UsdGeomXform whose transform is the sensor's position in stage
+    (meter, Z-up) coordinates. Identity and static placement live in the DATA
+    layer; measured values are overridden in the RUNTIME layer."""
+)
+{
+    # ---- Identity & provenance --------------------------------------------
+    string farmSensor:sensorId = "" (
+        displayGroup = "Identity"
+        doc = "Stable, unique sensor identifier (also the prim name)."
+    )
+    token farmSensor:kind = "soil_probe" (
+        allowedTokens = ["soil_probe", "weather_station", "canopy_probe", "satellite_virtual", "assessment_virtual"]
+        displayGroup = "Identity"
+        doc = "Sensor class. Virtual kinds are derived from satellite or manual data, not hardware."
+    )
+    token farmSensor:source = "synthetic" (
+        allowedTokens = ["synthetic", "agrifusion_assessment", "agrifusion_isda_grid", "farmwise_snapshot", "farmwise_isda_baseline", "aws_iot_core"]
+        displayGroup = "Identity"
+        doc = "Which upstream system authored the values (Phase 2 ingestion tags this)."
+    )
+    string farmSensor:externalRef = "" (
+        displayGroup = "Identity"
+        doc = "Upstream key: AgriFusion assessments.id, FarmWise snapshotId, or AWS IoT thing name."
+    )
+    rel farmSensor:zone (
+        displayGroup = "Identity"
+        doc = "The FarmZoneAPI prim this sensor reports into."
+    )
+    token farmSensor:status = "unknown" (
+        allowedTokens = ["unknown", "nominal", "warning", "critical", "offline"]
+        displayGroup = "Identity"
+        doc = "Health / alert state. Drives the marker colour override in the RUNTIME layer."
+    )
+    double farmSensor:lastUpdateTime = 0.0 (
+        displayGroup = "Identity"
+        doc = "Unix epoch seconds (UTC) of the newest value written to this prim."
+    )
+
+    # ---- Geolocation (WGS84, EPSG:4326) -----------------------------------
+    double farmSensor:latitude = 0.0 (
+        displayGroup = "Geolocation"
+        doc = "WGS84 latitude, decimal degrees. Source: AgriFusion gps_lat / FarmWise Plot.latitude."
+    )
+    double farmSensor:longitude = 0.0 (
+        displayGroup = "Geolocation"
+        doc = "WGS84 longitude, decimal degrees. Source: AgriFusion gps_lng / FarmWise Plot.longitude."
+    )
+    double farmSensor:elevation = 0.0 (
+        displayGroup = "Geolocation"
+        doc = "Metres above the WGS84 ellipsoid. Not produced by either legacy project; reserved for Cesium anchoring."
+    )
+
+    # ---- Soil (AgriFusion chemistry + SUBSTOR soil-water drivers) ---------
+    float farmSensor:soilMoisture = 0.0 (
+        displayGroup = "Soil"
+        doc = "Volumetric water content, percent. SUBSTOR soil-water driver. NOT measured by either legacy project; Phase 2 IoT input."
+    )
+    float farmSensor:soilTemperature = 0.0 (
+        displayGroup = "Soil"
+        doc = "Soil temperature at probe depth, degrees C. Phase 2 IoT input."
+    )
+    float farmSensor:soilPH = 7.0 (
+        displayGroup = "Soil"
+        doc = "pH, 0-14. AgriFusion chemicalConstraints.ph / FarmWise Plot.soilBaseline_pH."
+    )
+    float farmSensor:soilEC = 0.0 (
+        displayGroup = "Soil"
+        doc = "Electrical conductivity, dS/m. AgriFusion chemicalConstraints.ec."
+    )
+    float farmSensor:soilOrganicCarbon = 0.0 (
+        displayGroup = "Soil"
+        doc = "Organic carbon, percent by mass. AgriFusion organicCarbon (%); FarmWise soilBaseline_OC (iSDA g/kg, divide by 10)."
+    )
+    float farmSensor:nitrogenLevel = 0.0 (
+        displayGroup = "Soil"
+        doc = "Total nitrogen, percent by mass. AgriFusion nitrogen (%); FarmWise soilBaseline_N (iSDA g/kg, divide by 10)."
+    )
+    float farmSensor:phosphorusLevel = 0.0 (
+        displayGroup = "Soil"
+        doc = "Available phosphorus, mg/kg (ppm). AgriFusion phosphorus."
+    )
+    float farmSensor:potassiumLevel = 0.0 (
+        displayGroup = "Soil"
+        doc = "Exchangeable potassium, cmol(+)/kg (== meq/100g). AgriFusion potassium."
+    )
+    float farmSensor:aluminiumLevel = 0.0 (
+        displayGroup = "Soil"
+        doc = "Extractable aluminium, cmol(+)/kg. FarmWise soilBaseline_Al (iSDA)."
+    )
+    token farmSensor:soilTextureClass = "unknown" (
+        displayGroup = "Soil"
+        doc = "USDA texture class, lower_snake_case (e.g. sandy_loam). AgriFusion visualAssessment.textureClass."
+    )
+
+    # ---- Atmosphere (FarmWise weather + SUBSTOR / SimCast drivers) --------
+    float farmSensor:ambientTemperature = 0.0 (
+        displayGroup = "Atmosphere"
+        doc = "Air temperature, degrees C (instantaneous or daily mean). FarmWise daily_avg_temp_c."
+    )
+    float farmSensor:temperatureMax = 0.0 (
+        displayGroup = "Atmosphere"
+        doc = "Daily maximum air temperature, degrees C. SUBSTOR driver (TMAX). Legacy: Observation_Weather.tempMax (seed only)."
+    )
+    float farmSensor:temperatureMin = 0.0 (
+        displayGroup = "Atmosphere"
+        doc = "Daily minimum air temperature, degrees C. SUBSTOR driver (TMIN). Legacy: Observation_Weather.tempMin (seed only)."
+    )
+    float farmSensor:relativeHumidity = 0.0 (
+        displayGroup = "Atmosphere"
+        doc = "Relative humidity, percent. FarmWise daily_avg_humidity. SimCast needs hourly resolution (see humidHours)."
+    )
+    float farmSensor:precipitation = 0.0 (
+        displayGroup = "Atmosphere"
+        doc = "Precipitation, mm per day. FarmWise daily_precip_mm."
+    )
+    float farmSensor:solarRadiation = 0.0 (
+        displayGroup = "Atmosphere"
+        doc = "Global solar radiation, MJ/m^2/day. SUBSTOR driver (SRAD). Not produced by either legacy project."
+    )
+    float farmSensor:humidHours = 0.0 (
+        displayGroup = "Atmosphere"
+        doc = "Hours in the reporting period with RH >= 90 percent. SimCast blight-unit driver. Phase 2 IoT input."
+    )
+    float farmSensor:humidPeriodTemperature = 0.0 (
+        displayGroup = "Atmosphere"
+        doc = "Mean air temperature during the humid hours, degrees C. SimCast blight-unit driver."
+    )
+}
+
+# ---------------------------------------------------------------------------
+# FarmZoneAPI
+# ---------------------------------------------------------------------------
+class "FarmZoneAPI" (
+    inherits = </APISchemaBase>
+    customData = {
+        token apiSchemaType = "singleApply"
+        string className = "FarmZoneAPI"
+    }
+    doc = """A management unit of the farm: a FarmWise Plot / Season or an
+    AgriFusion assessment site. Apply to a UsdGeomXform under /World/Zones.
+    Plot-level satellite and phenology values live here, not on sensors."""
+)
+{
+    string farmZone:zoneId = "" (
+        displayGroup = "Identity"
+        doc = "Stable zone identifier (also the prim name)."
+    )
+    string farmZone:displayName = "" (
+        displayGroup = "Identity"
+        doc = "Human readable name (FarmWise Plot.name / AgriFusion farmerName + county)."
+    )
+    token farmZone:source = "synthetic" (
+        allowedTokens = ["synthetic", "farmwise_plot", "agrifusion_field"]
+        displayGroup = "Identity"
+    )
+    string farmZone:externalRef = "" (
+        displayGroup = "Identity"
+        doc = "FarmWise plotId (uuid4) or AgriFusion fields.id."
+    )
+    string farmZone:seasonRef = "" (
+        displayGroup = "Identity"
+        doc = "FarmWise seasonId (uuid4) for the active season."
+    )
+    string farmZone:polygonRef = "" (
+        displayGroup = "Identity"
+        doc = "AgroMonitoring polygon id (FarmWise Plot.agromonitoringPolygonId)."
+    )
+    double farmZone:centroidLatitude = 0.0 (displayGroup = "Geolocation")
+    double farmZone:centroidLongitude = 0.0 (displayGroup = "Geolocation")
+    float farmZone:areaHa = 0.0 (
+        displayGroup = "Management"
+        doc = "Area in hectares. FarmWise Plot.areaHa; AgriFusion fieldSize is acres in the UI (x0.4047)."
+    )
+    string farmZone:variety = "" (
+        displayGroup = "Management"
+        doc = "Potato cultivar (FarmWise PotatoVariety.name: Shangi, Kenya Mpya, Dutch Robjin, Tigoni, Asante)."
+    )
+    string farmZone:plantingDate = "" (
+        displayGroup = "Management"
+        doc = "ISO-8601 date (YYYY-MM-DD). FarmWise Season.plantingDate / AgriFusion fieldProfile.plantingDate."
+    )
+    token farmZone:growthStage = "unplanted" (
+        allowedTokens = ["unplanted", "emergence", "tuber_initiation", "tuber_bulking", "maturation", "harvested"]
+        displayGroup = "Phenology"
+        doc = "FarmWise GrowthStage.name normalised. SUBSTOR will drive this in Phase 2."
+    )
+    int farmZone:daysAfterPlanting = 0 (displayGroup = "Phenology")
+    float farmZone:accumulatedGDD = 0.0 (
+        displayGroup = "Phenology"
+        doc = "Growing degree days, base 8 degrees C. FarmWise Plot.accumulatedGDD."
+    )
+    float farmZone:ndvi = 0.0 (
+        displayGroup = "Canopy"
+        doc = "Mean NDVI, unitless 0-1. FarmWise DailySnapshot.mean_ndvi."
+    )
+    float farmZone:evi = 0.0 (
+        displayGroup = "Canopy"
+        doc = "Mean EVI. FarmWise derives this as ndvi * 0.82; treat as low confidence."
+    )
+    float farmZone:cloudCover = 0.0 (
+        displayGroup = "Canopy"
+        doc = "Cloud cover percent for the satellite pass. FarmWise cloud_cover_percentage."
+    )
+    double farmZone:lastUpdateTime = 0.0 (displayGroup = "Identity")
+}
+
+# ---------------------------------------------------------------------------
+# CropModelStateAPI  (Phase 2 write target; declared now for a stable contract)
+# ---------------------------------------------------------------------------
+class "CropModelStateAPI" (
+    inherits = </APISchemaBase>
+    customData = {
+        token apiSchemaType = "singleApply"
+        string className = "CropModelStateAPI"
+    }
+    doc = """Outputs of the SUBSTOR-Potato and SimCast models for one zone.
+    Written only by the Phase 2 model bridges into the RUNTIME layer."""
+)
+{
+    float cropModel:substorTotalDryMatter = 0.0 (
+        displayGroup = "SUBSTOR"
+        doc = "Total above + below ground dry matter, kg/ha."
+    )
+    float cropModel:substorTuberDryMatter = 0.0 (
+        displayGroup = "SUBSTOR"
+        doc = "Tuber dry matter, kg/ha."
+    )
+    float cropModel:substorLeafAreaIndex = 0.0 (displayGroup = "SUBSTOR")
+    float cropModel:substorTuberFreshYield = 0.0 (
+        displayGroup = "SUBSTOR"
+        doc = "Predicted fresh tuber yield, t/ha."
+    )
+    double cropModel:substorLastRunTime = 0.0 (displayGroup = "SUBSTOR")
+
+    float cropModel:simcastBlightUnits = 0.0 (
+        displayGroup = "SimCast"
+        doc = "Accumulated blight units since last spray."
+    )
+    float cropModel:simcastFungicideUnits = 0.0 (
+        displayGroup = "SimCast"
+        doc = "Accumulated fungicide weathering units since last spray."
+    )
+    token cropModel:simcastBlightRisk = "none" (
+        allowedTokens = ["none", "low", "moderate", "high", "severe"]
+        displayGroup = "SimCast"
+    )
+    bool cropModel:simcastSprayRecommended = false (displayGroup = "SimCast")
+    double cropModel:simcastLastRunTime = 0.0 (displayGroup = "SimCast")
+}

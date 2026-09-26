@@ -1,0 +1,79 @@
+#usda 1.0
+(
+    "RUNTIME layer - live telemetry overrides. Cleared freely; never holds definitions."
+    customLayerData = {
+        string generator = "omniverse_crop_intelligence"
+        string phase = "1"
+    }
+)
+
+over "World"
+{
+    over "Sensors"
+    {
+        over "SoilProbe_NW"
+        {
+            double farmSensor:lastUpdateTime = 1790417599.2172356
+            float farmSensor:nitrogenLevel = 0.14
+            float farmSensor:soilMoisture = 27.5
+            float farmSensor:soilPH = 5.6
+            float farmSensor:soilTemperature = 17.9
+            token farmSensor:status = "nominal"
+
+            over "Marker"
+            {
+                color3f[] primvars:displayColor = [(0.2, 0.8, 0.3)]
+            }
+        }
+
+        over "WeatherStation_C"
+        {
+            float farmSensor:ambientTemperature = 19.4
+            float farmSensor:humidHours = 9
+            float farmSensor:humidPeriodTemperature = 15.2
+            double farmSensor:lastUpdateTime = 1790417599.2172356
+            float farmSensor:precipitation = 6.2
+            float farmSensor:relativeHumidity = 88
+            token farmSensor:status = "warning"
+            float farmSensor:temperatureMax = 24.1
+            float farmSensor:temperatureMin = 11.8
+
+            over "Marker"
+            {
+                color3f[] primvars:displayColor = [(0.95, 0.75, 0.1)]
+            }
+        }
+
+        over "SoilAssessment_SE"
+        {
+            double farmSensor:lastUpdateTime = 1790417599.2172356
+            float farmSensor:nitrogenLevel = 0.14
+            float farmSensor:phosphorusLevel = 14
+            float farmSensor:potassiumLevel = 0.45
+            float farmSensor:soilEC = 0.15
+            float farmSensor:soilOrganicCarbon = 1.8
+            float farmSensor:soilPH = 5.4
+            token farmSensor:status = "nominal"
+
+            over "Marker"
+            {
+                color3f[] primvars:displayColor = [(0.2, 0.8, 0.3)]
+            }
+        }
+    }
+
+    over "Zones"
+    {
+        over "Zone_DemoPlot"
+        {
+            float farmZone:accumulatedGDD = 410
+            float farmZone:cloudCover = 8
+            int farmZone:daysAfterPlanting = 42
+            float farmZone:evi = 0.51
+            token farmZone:growthStage = "tuber_initiation"
+            double farmZone:lastUpdateTime = 1790417599.2172356
+            float farmZone:ndvi = 0.62
+        }
+    }
+}
+

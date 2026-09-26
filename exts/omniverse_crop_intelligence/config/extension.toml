@@ -1,0 +1,58 @@
+# Omniverse Kit extension manifest - omniverse_crop_intelligence
+# Kit SDK 106.x / 107.x. Validate with:  kit --ext-folder ./exts --enable omniverse_crop_intelligence
+
+[package]
+version = "0.1.0"
+title = "Omniverse Crop Intelligence"
+description = "Agricultural digital twin foundation: OpenUSD farm layer stack (ASSET / DATA / SIM / RUNTIME), codeless FarmSensorAPI schemas, virtual sensor spawning and a control panel. Phase 1 of merging the AgriFusion soil platform and FarmWise potato project."
+category = "Simulation"
+authors = ["Crop Intelligence team"]
+keywords = ["agriculture", "digital twin", "openusd", "iot", "potato", "soil", "sensor"]
+readme = "docs/README.md"
+changelog = "docs/CHANGELOG.md"
+repository = ""
+# preview_image = "data/preview.png"   # add before publishing to the registry
+# icon = "data/icon.png"
+python = "3.10,3.11"
+
+[dependencies]
+# UI
+"omni.kit.uiapp" = {}
+"omni.ui" = {}
+"omni.kit.menu.utils" = {}
+# USD / stage
+"omni.usd" = {}
+"omni.kit.commands" = {}
+# Nucleus / omniverse:// asset resolution for the farm scan reference
+"omni.client" = {}
+# 3D viewer
+"omni.kit.viewport.window" = {}
+"omni.kit.viewport.utility" = {}
+# Nice-to-have (not required for headless test apps)
+"omni.kit.notification_manager" = { optional = true }
+
+[[python.module]]
+name = "omniverse_crop_intelligence"
+
+[settings]
+# omniverse:// requires a running Nucleus; a local path (file:///...) also works.
+exts."omniverse_crop_intelligence".farmAssetPath = "omniverse://localhost/Projects/Farm/farm_scan.usd"
+# Where the .usda sublayer stack is generated. carb tokens are resolved.
+exts."omniverse_crop_intelligence".layerOutputDir = "${omni_documents}/omniverse_crop_intelligence/layers"
+# Build the stage as soon as the extension loads (handy for demos / app files).
+exts."omniverse_crop_intelligence".autoBuildOnStartup = false
+# Spawn the demo zone + three test sensors after a build when the DATA layer is empty.
+exts."omniverse_crop_intelligence".spawnTestSensorsOnBuild = true
+
+[[test]]
+dependencies = [
+    "omni.kit.test",
+    "omni.kit.ui_test",
+]
+args = [
+    "--/app/window/dpiScaleOverride=1.0",
+    "--/app/window/scaleToMonitor=false",
+    "--/exts/omniverse_crop_intelligence/autoBuildOnStartup=false",
+    "--no-window",
+]
+pythonTests.include = ["omniverse_crop_intelligence.tests.*"]

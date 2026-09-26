@@ -1,0 +1,50 @@
+#usda 1.0
+(
+    "ASSET layer - static 3D farm environment. Re-generated on every build."
+    customLayerData = {
+        string generator = "omniverse_crop_intelligence"
+        string phase = "1"
+    }
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World"
+{
+    def Xform "Farm"
+    {
+        def Xform "FarmScan" (
+            "3D farm scan. Expected upstream pipeline: photos -> 3DGS (.ply) -> USD. If the asset cannot be resolved the prim composes empty and PlaceholderGround is shown."
+            prepend references = @omniverse://localhost/Projects/Farm/farm_scan.usd@
+        )
+        {
+            custom string farm:assetPath = "omniverse://localhost/Projects/Farm/farm_scan.usd"
+        }
+
+        def Mesh "PlaceholderGround" (
+            "Fallback soil plane so the viewer is never empty. Hide or delete once the real scan resolves."
+        )
+        {
+            uniform bool doubleSided = 1
+            float3[] extent = [(-60, -60, 0), (60, 60, 0)]
+            int[] faceVertexCounts = [4]
+            int[] faceVertexIndices = [0, 1, 2, 3]
+            point3f[] points = [(-60, -60, 0), (60, -60, 0), (60, 60, 0), (-60, 60, 0)]
+            color3f[] primvars:displayColor = [(0.3, 0.24, 0.16)]
+            uniform token subdivisionScheme = "none"
+        }
+    }
+
+    def Xform "Environment"
+    {
+        def DistantLight "Sun"
+        {
+            float inputs:angle = 0.53
+            float inputs:intensity = 3000
+            float3 xformOp:rotateXYZ = (-50, 0, 30)
+            uniform token[] xformOpOrder = ["xformOp:rotateXYZ"]
+        }
+    }
+}
+
