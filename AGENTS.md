@@ -8,11 +8,11 @@ the details live in `docs/`.
 An NVIDIA Omniverse Kit extension (`exts/omniverse_crop_intelligence`) that
 turns two legacy repos into one agricultural digital twin:
 
-* `../agrifusion-aws` - "AgriFusion", soil assessments (pH, EC, OC, N, P, K), Next.js + Aurora. **No IoT, no soil moisture.**
+* `../ai-kenya` - "AgriFusion", soil assessments (pH, EC, OC, N, P, K), Next.js + Aurora + Go backend. **No IoT, no soil moisture.** (The old `../agrifusion-aws` path never existed here - see `docs/04` F2.)
 * `../agriLegends` - "FarmWise", potato monitoring (daily weather, NDVI, GDD, growth stage), FastAPI + Neo4j. **No SUBSTOR, no SimCast.**
 
-The governing spec is "Fable Prompt One" in the workspace root PDF
-(`../NVIDIA Farm Digital Twin Prompt.pdf`, section 8) with the user's edits:
+The governing spec is "Fable Prompt One" (section 8), tracked at
+`docs/NVIDIA Farm Digital Twin Prompt.md`, with the user's edits:
 AWS instead of Azure; extension name `omniverse_crop_intelligence`.
 
 ## Where we are
@@ -20,6 +20,12 @@ AWS instead of Azure; extension name `omniverse_crop_intelligence`.
 Check `docs/00_PHASE_PLAN.md` first. As of 2026-09-26: **Phase 1 done**,
 awaiting an in-Kit smoke test (no Kit SDK / GPU on the dev box). Phase 2
 (ingestion + model bridges) has not started.
+
+**2026-09-27:** for the GoMyCode/NVIDIA hackathon (live pitch, deadline same
+day, free Colab/Kaggle only) the demo pivoted to notebook + browser; Kit/RTX
+is the post-hackathon runtime. Binding decision record:
+`docs/04_AUDIT_AND_PIVOT.md` (audit, verification log, execution plan, claims
+ledger). Read it before planning any demo or pitch work.
 
 ## Non-negotiable rules
 
@@ -47,3 +53,4 @@ kit apps/omniverse_crop_intelligence.kit        # needs Kit SDK + GPU
 * `docs/01_REPOSITORY_ANALYSIS_AND_MAPPING.md` - legacy variables -> schema attributes, gaps, upstream bugs
 * `docs/02_ARCHITECTURE.md` - layers, prims, schemas, runtime update path, Kit glue
 * `docs/03_PHASE2_HANDOFF.md` - forward plan and the draft Prompt Two
+* `docs/04_AUDIT_AND_PIVOT.md` - 2026-09-27 audit, verification log, demo pivot, execution plan, pitch claims ledger

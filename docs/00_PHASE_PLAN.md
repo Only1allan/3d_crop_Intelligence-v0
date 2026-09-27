@@ -4,10 +4,18 @@ Source of truth for *where the project is*. Update the status column when a
 phase item lands. Agents read this file at the start of every session (see
 `AGENTS.md`).
 
-Origin: the "Fable Prompt One" handoff packet (workspace root, `NVIDIA Farm
-Digital Twin Prompt.pdf`, section 8) with the user's edits: AWS instead of
-Azure, target extension name `omniverse_crop_intelligence`, inputs
-`/agrifusion-aws` (soil) and `/agriLegends` (potato).
+Origin: the "Fable Prompt One" handoff packet (section 8; now tracked at
+`docs/NVIDIA Farm Digital Twin Prompt.md`) with the user's edits: AWS instead
+of Azure, target extension name `omniverse_crop_intelligence`, inputs
+`/ai-kenya` (soil; see `docs/04` F2 - the previously documented
+`/agrifusion-aws` path never existed) and `/agriLegends` (potato).
+
+## 2026-09-27 audit and demo pivot
+
+Full audit + external verification complete. For the hackathon window
+(deadline same day, live pitch, free Colab/Kaggle only) the demo substrate is
+pivoted to notebook + browser; Kit/RTX stays the post-hackathon runtime.
+Binding record: `docs/04_AUDIT_AND_PIVOT.md` - read it before any demo work.
 
 ## Phase 1 - 3D foundation  (status: DONE 2026-09-26, pending in-Kit smoke test)
 
@@ -37,7 +45,7 @@ maths, no Isaac Sim / physics.
 ## Phase 3 - Geospatial + simulation  (status: NOT STARTED)
 
 1. Cesium for Omniverse anchoring using `farmSensor:latitude/longitude` and zone centroids.
-2. Real 3DGS farm scan pipeline (photos -> 3DGS `.ply` -> USD) replacing the placeholder reference.
+2. Real 3DGS farm scan pipeline (photos -> 3DGS `.ply` -> USD) replacing the placeholder reference. *2026-09-27: a notebook-scoped PoC of this item on the Inria public capture is authorized for the hackathon demo (`docs/04` D9); production farm-scan work stays Phase 3.*
 3. `SIM_LYR`: UsdPhysics collision on the scan; Isaac Sim drone / rover navigation.
 4. Omniverse Replicator synthetic data for canopy disease detection.
 
