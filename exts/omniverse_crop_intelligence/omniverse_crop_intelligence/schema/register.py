@@ -31,11 +31,17 @@ def is_schema_registered() -> bool:
         return False
 
 
-def register_schema_plugin(plugin_dir: Optional[str] = None) -> bool:
+def register_schema_plugin(plugin_dir: Optional[str] = None, attempts: int = 3) -> bool:
     """
     Idempotently register the plugin directory. Returns True when the schema
     is usable afterwards. Safe to call on every extension startup: Plug will
     not double-register the same path.
+
+    Ordering note (verified on usd-core 26.8): if the process already used the
+    SchemaRegistry (any stage open / registry query) before the first
+    registration, the first notice can be missed while the registry is built
+    lazily. A repeat registration attempt makes the registry rebuild, so this
+    helper retries a bounded number of times and only then fails.
     """
     global _REGISTERED
     plugin_dir = plugin_dir or SCHEMA_PLUGIN_DIR
@@ -48,14 +54,15 @@ def register_schema_plugin(plugin_dir: Optional[str] = None) -> bool:
             f"Schema plugin not found at {plug_info}. Run `python tools/gen_schema.py` to regenerate."
         )
 
-    plugins = Plug.Registry().RegisterPlugins(plugin_dir)
-    names = [p.name for p in plugins]
-    # RegisterPlugins returns [] if the path was already registered earlier in
-    # this process, so fall through to the schema-registry check either way.
-    _REGISTERED = is_schema_registered()
-    if not _REGISTERED:
-        raise RuntimeError(
-            f"Registered plugins {names} from {plugin_dir} but FarmSensorAPI is still unknown. "
-            "Check plugInfo.json 'Root'/'ResourcePath' are '.' and generatedSchema.usda exists."
-        )
-    return True
+    names: list = []
+    for _ in range(max(1, attempts)):
+        plugins = Plug.Registry().RegisterPlugins(plugin_dir)
+        names = [p.name for p in plugins]
+        _REGISTERED = is_schema_registered()
+        if _REGISTERED:
+            return True
+    raise RuntimeError(
+        f"Registered plugins {names} from {plugin_dir} but FarmSensorAPI is still unknown "
+        f"after {attempts} attempts. Check plugInfo.json and that {plugin_dir} contains "
+        "generatedSchema.usda."
+    )
