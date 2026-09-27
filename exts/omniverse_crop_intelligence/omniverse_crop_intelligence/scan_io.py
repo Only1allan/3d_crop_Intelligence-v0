@@ -36,6 +36,18 @@ _PLY_TYPE_FMT = {
     "ushort": "<H", "uint16": "<H",
 }
 _PLY_TYPE_SIZE = {"<f": 4, "<d": 8, "<B": 1, "<b": 1, "<i": 4, "<I": 4, "<h": 2, "<H": 2}
+# numpy letter per PLY type NAME (PLY spec aliases included). Kept separate from
+# _PLY_TYPE_FMT: the struct path keys by format string, the numpy path by name.
+_PLY_NUMPY_TYPE = {
+    "float": "f4", "float32": "f4",
+    "double": "f8", "float64": "f8",
+    "uchar": "u1", "uint8": "u1",
+    "char": "i1", "int8": "i1",
+    "int": "i4", "int32": "i4",
+    "uint": "u4", "uint32": "u4",
+    "short": "i2", "int16": "i2",
+    "ushort": "u2", "uint16": "u2",
+}
 
 Prop = Tuple[str, str]  # (ply_type, name)
 
@@ -101,14 +113,13 @@ def _load_columns(path: str, offset: int, count: int, props: List[Prop],
         blob = fh.read(count * stride)
     if len(blob) < count * stride:
         raise ValueError(f"truncated PLY vertex block: {len(blob)} bytes, expected {count * stride}")
-    try:  # optional fast path
+    try:  # optional fast path; any failure falls back to the proven struct loop
         import numpy as np  # type: ignore
 
-        dtype = np.dtype([(name, ("f4" if _PLY_TYPE_SIZE[f] == 4 else "f8"))
-                          for f, name in props])
+        dtype = np.dtype([(name, "<" + _PLY_NUMPY_TYPE[t]) for t, name in props])
         arr = np.frombuffer(blob, dtype=dtype, count=count)
         return {w: arr[w].astype("float64").tolist() for w in wanted}
-    except ImportError:
+    except Exception:  # noqa: BLE001 - numpy missing or unsupported layout
         pass
     for r in range(count):
         vals = row.unpack_from(blob, r * stride)

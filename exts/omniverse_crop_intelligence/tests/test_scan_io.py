@@ -145,3 +145,31 @@ def test_missing_property_is_actionable(tmp_path):
     out = str(tmp_path / "o.usda")
     with pytest.raises(ValueError, match="f_dc_0"):
         convert(path, out)
+
+
+def test_numpy_fast_path_matches_struct_path(ply, tmp_path, monkeypatch):
+    """Invariant: the optional numpy fast path and the pure-struct fallback must
+    produce byte-identical USD. Regression for the fast path crash caught when
+    numpy was present (its dtype lookup keyed by the wrong dict)."""
+    out_fast = str(tmp_path / "fast.usda")
+    out_slow = str(tmp_path / "slow.usda")
+    s_fast = convert(ply, out_fast)
+    real_import = __import__
+
+    def no_numpy(name, *a, **k):
+        if name == "numpy":
+            raise ImportError("blocked for test")
+        return real_import(name, *a, **k)
+
+    monkeypatch.setattr("builtins.__import__", no_numpy)
+    s_slow = convert(ply, out_slow)
+    assert s_fast["points_out"] == s_slow["points_out"]
+    a = Usd.Stage.Open(out_fast)
+    b = Usd.Stage.Open(out_slow)
+    pa = UsdGeom.Points(a.GetPrimAtPath("/FarmScan/PointCloud"))
+    pb = UsdGeom.Points(b.GetPrimAtPath("/FarmScan/PointCloud"))
+    assert list(pa.GetPointsAttr().Get()) == list(pb.GetPointsAttr().Get())
+    assert list(UsdGeom.PrimvarsAPI(pa.GetPrim()).GetPrimvar("displayColor").Get()) == \
+           list(UsdGeom.PrimvarsAPI(pb.GetPrim()).GetPrimvar("displayColor").Get())
+    assert list(pa.GetPrim().GetAttribute("widths").Get()) == \
+           list(pb.GetPrim().GetAttribute("widths").Get())
