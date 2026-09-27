@@ -103,9 +103,12 @@ twin's 4D time-sample mechanic fed with real agricultural data.
 - [x] Twin kernel ran end-to-end on Kaggle; outputs on the kernel page,
       including the full 1,695,890-point scan composing into the twin.
 - [x] `orbit.mp4` + viewer PLY committed under `docs/viewer/`.
-- [ ] On the pitch laptop: `cd docs/viewer && python -m http.server 8000`
-      -> `http://localhost:8000` (serves the interactive viewer; file:// will
-      NOT work due to module CORS).
+- [ ] On the pitch laptop: `cd docs && python3 -m http.server 8000`
+      -> truck viewer `http://localhost:8000/viewer/`, garden
+      `http://localhost:8000/viewer-garden/`, 4D plant
+      `http://localhost:8000/viewer/pheno.html` (serving from `docs/` root is
+      what makes the cross-links work; `file://` will NOT work due to module
+      CORS).
 - [ ] Phone loads the viewer from the laptop IP on venue Wi-Fi/hotspot.
 
 ## Hosting note (Pages)
