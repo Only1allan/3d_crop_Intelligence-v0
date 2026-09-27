@@ -3,20 +3,40 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Omniverse Crop Intelligence - 3DGS Farm Scan (PoC)</title>
+<title>Omniverse Crop Intelligence - Farm Scan (live 3D)</title>
 <style>
   html, body { margin: 0; height: 100%; background: #0b0f14; color: #e8edf2;
                font: 14px/1.45 system-ui, sans-serif; overflow: hidden; }
   #app { position: fixed; inset: 0; }
-  #panel { position: fixed; top: 16px; left: 16px; max-width: 380px; z-index: 10;
-           background: rgba(11, 15, 20, .88); border: 1px solid #26313d;
-           border-radius: 10px; padding: 14px 16px; }
-  #panel h1 { font-size: 15px; margin: 0 0 6px; letter-spacing: .2px; }
-  #panel p  { margin: 4px 0; color: #aab7c4; font-size: 12.5px; }
+  #splash { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 14px;
+            background: #0b0f14; transition: opacity .6s; }
+  #splash.done { opacity: 0; pointer-events: none; }
+  #splash h1 { font-size: 19px; margin: 0; letter-spacing: .4px; }
+  #splash p { margin: 0; color: #aab7c4; font-size: 13px; }
+  .spin { width: 34px; height: 34px; border-radius: 50%;
+          border: 3px solid #26313d; border-top-color: #7ddc95;
+          animation: r 1s linear infinite; }
+  @keyframes r { to { transform: rotate(360deg); } }
+  #bar { width: 240px; height: 4px; border-radius: 99px; background: #1a242e; overflow: hidden; }
+  #bar > i { display: block; height: 100%; width: 0%; background: #7ddc95; transition: width .3s; }
+  #panel { position: fixed; top: 16px; left: 16px; max-width: 360px; z-index: 10;
+           background: rgba(11, 15, 20, .86); border: 1px solid #26313d;
+           border-radius: 10px; padding: 13px 15px; }
+  #panel h1 { font-size: 15px; margin: 0 0 6px; }
+  #panel p { margin: 4px 0; color: #aab7c4; font-size: 12.5px; }
   #panel .badge { display: inline-block; padding: 2px 8px; border-radius: 999px;
                   font-size: 11px; background: #14351f; color: #7ddc95; margin-right: 6px; }
   #panel .badge.gray { background: #232c36; color: #aab7c4; }
-  #err { position: fixed; inset: auto 16px 16px 16px; max-width: 520px; z-index: 20;
+  #hud { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 10;
+         display: flex; gap: 8px; }
+  #hud button { background: rgba(11,15,20,.86); color: #e8edf2; border: 1px solid #26313d;
+                border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; }
+  #hud button:hover { border-color: #7ddc95; color: #7ddc95; }
+  #hud button.on { background: #14351f; color: #7ddc95; border-color: #7ddc95; }
+  #hint { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); z-index: 9;
+          color: #6c7a89; font-size: 12px; }
+  #err { position: fixed; inset: auto 16px 90px 16px; max-width: 560px; z-index: 30;
          background: #3a1518; border: 1px solid #7a2c31; border-radius: 10px;
          padding: 12px 14px; display: none; font-size: 12.5px; }
   #err a { color: #9ecbff; }
@@ -33,36 +53,109 @@
 </head>
 <body>
 <div id="app"></div>
+
+<div id="splash">
+  <div class="spin"></div>
+  <h1>Omniverse Crop Intelligence</h1>
+  <p id="stage">starting&hellip;</p>
+  <div id="bar"><i></i></div>
+  <p style="font-size:11.5px">3D Gaussian scan of a real scene - trained on a free GPU, decoded in your browser</p>
+</div>
+
 <div id="panel">
   <h1>Omniverse Crop Intelligence</h1>
-  <p><span class="badge">REAL GPU run</span><span class="badge gray">public capture PoC</span></p>
-  <p>3D Gaussian Splatting trained on a free Kaggle T4 (7k iters, PSNR 25.0)
-     from the INRIA public reference capture - the pipeline proof for the farm
-     scan (Phase 3). The capture is <b>not</b> a farm; the field-scan pipeline
-     is the claim.</p>
-  <p>The same .ply is converted to OpenUSD (<code>scan_io</code>) and composes
-     into the farm twin layer stack headless. GoMyCode x NVIDIA hackathon, 2026-09-27.</p>
+  <p><span class="badge">REAL GPU RUN</span><span class="badge gray">public capture PoC</span></p>
+  <p>3D Gaussian Splatting trained on a free Kaggle T4 (7k iters, PSNR 25.0) from
+     the INRIA public reference capture - the pipeline proof for the farm scan
+     (Phase 3). The capture is <b>not</b> a farm yet; the pipeline is the claim.</p>
+  <p>The same scan converts to OpenUSD (<code>scan_io</code>) and composes into
+     the farm twin's layer stack headless. GoMyCode x NVIDIA hackathon, 2026-09-27.</p>
 </div>
+
+<div id="hud">
+  <button id="cruise">&#10218; cruise</button>
+  <button id="top">&#9968; top view</button>
+  <button id="reset">&#8962; street view</button>
+</div>
+<div id="hint">drag to look &middot; scroll to zoom &middot; right-drag to pan</div>
 <div id="err"></div>
+
+<script>
+  // Visible-by-default splash: the page is never blank, whatever happens below.
+  const stage = document.getElementById('stage');
+  const bar = document.querySelector('#bar > i');
+  const errBox = document.getElementById('err');
+  function fail(msg) {
+    errBox.style.display = 'block';
+    errBox.innerHTML = '<b>Viewer could not load.</b> ' + msg +
+      '<br>Fallback: watch <a href="./orbit.mp4">orbit.mp4</a> or open the twin notebook outputs.';
+    document.getElementById('splash').classList.add('done');
+  }
+  window.onerror = (m) => fail('Script error: ' + m + ' (needs internet for the two CDN modules).');
+  let pct = 5; const tick = setInterval(() => { pct = Math.min(pct + 2, 92); bar.style.width = pct + '%'; }, 350);
+</script>
+
 <script type="module">
-const errBox = document.getElementById('err');
-function fail(msg) {
-  errBox.style.display = 'block';
-  errBox.innerHTML = '<b>Viewer could not load.</b> ' + msg +
-    '<br>Fallback: watch <a href="./orbit.mp4">orbit.mp4</a> or open the twin notebook.';
-}
+const CENTER = [-0.2, -1.3, 0.7];          // scene median (COLMAP Y-up world)
+const HOME   = [67, 16, 68];               // framing shot that fills the view
+const TOP    = [-0.2, 95, -1.0];           // near-straight-down field view
+stage.textContent = 'fetching 3D modules (CDN)\u2026';
 try {
   const GaussianSplats3D = await import('@mkkellogg/gaussian-splats-3d');
+  stage.textContent = 'downloading scan.ply (35 MB)\u2026';
   const viewer = new GaussianSplats3D.Viewer({
     rootElement: document.getElementById('app'),
     sharedMemoryForWorkers: false,
     gpuAcceleratedSort: false,
+    cameraUp: [0, 1, 0],
+    initialCameraPosition: HOME,
+    initialCameraLookAt: CENTER,
+    antialiased: true,
   });
-  await viewer.addSplatScene('./scan.ply', { showLoadingUI: true });
+  await viewer.addSplatScene('./scan.ply', { showLoadingUI: false, progressiveLoad: true });
+  stage.textContent = 'rendering \u2026';
   viewer.start();
+  clearInterval(tick); bar.style.width = '100%';
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('done');
+    document.getElementById('hint').style.opacity = 1;
+  }, 900);
+  window.__viewer = viewer;
+
+  // --- demo controls -------------------------------------------------------
+  const move = (pos, look = CENTER) => {
+    viewer.camera.position.fromArray(pos);
+    viewer.camera.lookAt(...look);
+  };
+  let cruise = null;
+  const btn = (id) => document.getElementById(id);
+  btn('reset').onclick = () => { stopCruise(); move(HOME); };
+  btn('top').onclick = () => { stopCruise(); move(TOP); };
+  function stopCruise() {
+    if (cruise) { cancelAnimationFrame(cruise); cruise = null; btn('cruise').classList.remove('on'); }
+  }
+  btn('cruise').onclick = () => {
+    if (cruise) { stopCruise(); return; }
+    btn('cruise').classList.add('on');
+    let a = Math.atan2(viewer.camera.position.x - CENTER[0],
+                       viewer.camera.position.z - CENTER[2]);
+    const step = () => {
+      a += 0.0016;
+      const r = Math.max(60, Math.hypot(viewer.camera.position.x - CENTER[0],
+                                        viewer.camera.position.z - CENTER[2]));
+      viewer.camera.position.set(CENTER[0] + Math.sin(a) * r, viewer.camera.position.y,
+                                 CENTER[2] + Math.cos(a) * r);
+      viewer.camera.lookAt(...CENTER);
+      cruise = requestAnimationFrame(step);
+    };
+    step();
+  };
+  // start the show hands-free
+  setTimeout(() => btn('cruise').click(), 2500);
 } catch (e) {
+  clearInterval(tick);
   fail('Detail: ' + (e && e.message ? e.message : e) +
-       '<br>If this is a missing-file error, upload <code>scan.ply</code> next to this page.');
+       '<br>If this is a network error the laptop is offline - the two 3D modules come from a CDN.');
 }
 </script>
 </body>
