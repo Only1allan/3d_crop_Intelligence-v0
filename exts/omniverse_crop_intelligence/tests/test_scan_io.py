@@ -28,10 +28,11 @@ from omniverse_crop_intelligence.scan_io import (  # noqa: E402
     SH_C0, convert, parse_ply_header)
 from omniverse_crop_intelligence.stage_builder import StageBuilder  # noqa: E402
 
-# INRIA 3DGS PLY property layout, in order.
+# INRIA 3DGS PLY property layout, in order — the exact 62-property schema the
+# trainer emits (f_rest_0..44 full SH band included).
 PROPS = ([("float", n) for n in ("x", "y", "z", "nx", "ny", "nz")]
          + [("float", f"f_dc_{i}") for i in range(3)]
-         + [("float", f"f_rest_{i}") for i in range(3)]  # reduced rest band; parser must not care
+         + [("float", f"f_rest_{i}") for i in range(45)]
          + [("float", "opacity")]
          + [("float", f"scale_{i}") for i in range(3)]
          + [("float", f"rot_{i}") for i in range(4)])
@@ -47,17 +48,19 @@ def _write_ply(path: str, rows) -> None:
             fh.write(struct.pack("<" + "f" * len(PROPS), *[float(v) for v in row]))
 
 
-def _row(x, y, z, r, g, b, scale=math.log(0.05)):
+def _row(x, y, z, r, g, b, scale=math.log(0.05), idx=0):
     # f_dc_* chosen so 0.5 + SH_C0*f_dc == the target channel exactly.
+    # f_rest_0..44 padded with a varied ramp: the parser must skip them by name.
     return (x, y, z, 0, 0, 0,
             (r - 0.5) / SH_C0, (g - 0.5) / SH_C0, (b - 0.5) / SH_C0,
-            0, 0, 0, 0.9, scale, scale, scale, 1, 0, 0, 0)
+            *[(idx + j) % 7 * 0.01 - 0.03 for j in range(45)],
+            0.9, scale, scale, scale, 1, 0, 0, 0)
 
 
 @pytest.fixture()
 def ply(tmp_path):
     # 8 points, Y-up source frame (COLMAP convention), distinct colors.
-    rows = [_row(1.0 * i, 0.5 * i, -0.25 * i, i / 8.0, 1.0 - i / 8.0, 0.5) for i in range(8)]
+    rows = [_row(1.0 * i, 0.5 * i, -0.25 * i, i / 8.0, 1.0 - i / 8.0, 0.5, idx=i) for i in range(8)]
     path = str(tmp_path / "scan.ply")
     _write_ply(path, rows)
     return path

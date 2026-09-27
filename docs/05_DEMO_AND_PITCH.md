@@ -34,6 +34,8 @@ pitch, free Colab/Kaggle only, browser-only workstations.**
 
 ## Pre-pitch checklist (T-60 min)
 
+- [ ] `pivot` branch **merged into `main`** (GitHub web UI: PR `pivot` -> `main`,
+      merge). Pages and the notebooks' default clone both follow `main`.
 - [ ] Repo pushed to `main` (notebooks, viewer page, docs).
 - [ ] GitHub Pages enabled: Settings > Pages > Deploy from branch `main`,
       folder `/docs`. Viewer URL:
