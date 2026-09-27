@@ -244,6 +244,23 @@ All artifacts must open with zero install in a browser.
    443 — notebook-egress-friendly), adapters with unit conversion, legacy
    back-fill against the **current** AgriFusion tree (Go backend — §5.1).
 5. Legacy hygiene: secrets removal, LICENSE decision, then real data.
+6. Real-agriculture 3D data sources (verified 2026-09-27, no registration
+   walls) for the twin side — both ship pre-reconstructed point clouds, NOT
+   photo+pose captures, so they feed the USD-point-cloud path (`scan_io`
+   family), not 3DGS training:
+   - **BonnBeetClouds3D** (Uni Bonn, IROS 2024) — 11.1 GB zip, real
+     sugar-beet field plots, aerial photogrammetry, per-point plant/leaf
+     instance labels + phenotypic measurements.
+     https://bonnbeetclouds3d.ipb.uni-bonn.de (DOI 10.60507/FK2/34W30T)
+   - **Pheno4D** (Uni Bonn/ETH) — 4.4 GB zip, direct download; daily
+     sub-millimeter 3D scans of the same maize/tomato plants across growth
+     stages (~260M labeled points). Multi-temporal structure is a natural fit
+     for the twin's time-sample replay (per-plant 4D).
+     https://www.ipb.uni-bonn.de/data/pheno4d/index.html
+   For 3DGS training on real fields (photos + poses), no public dataset
+   exists (checked ricber/digital-agriculture-datasets catalog, ODM
+   community, Mip-NeRF 360, INRIA tandt): Phase 3 must capture its own
+   (30-60 phone/drone photos, calm morning; COLMAP included in the pipeline).
 
 ## 12. Open items / unverified assumptions
 
