@@ -22,3 +22,7 @@ _repo/
 !docs/viewer/orbit.mp4
 !docs/viewer/metrics.json
 !assets/farm_scan.usda
+!docs/viewer-garden/scan.ply
+!docs/viewer-garden/orbit.mp4
+!docs/viewer-garden/metrics.json
+!assets/farm_scan_garden.usda

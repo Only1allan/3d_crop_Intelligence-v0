@@ -11,8 +11,9 @@ pitch, free Kaggle/Colab only.**
 | Twin notebook | `notebooks/twin_demo.ipynb` (Kaggle CPU kernel or Colab) | 20 green invariant tests, layer stack build, layer separation, 30-day time-sample replay + scrub, farm map, scan composition |
 | GPU notebook | `notebooks/gs_scan.ipynb` (Kaggle T4x2 kernel `allankariuki/crop-gs-scan`, or Colab T4) | Real 3DGS training (7k iters, PSNR), orbit `orbit.mp4` render, `scan.ply` + `scan_viewer.ply` + `farm_scan.usda` export |
 | Browser viewer | `docs/viewer/index.html` + `scan.ply` (committed) - serve locally (`python -m http.server`) or GitHub Pages if the repo ever goes public | Interactive 3D splat, honest badge overlay |
-| Backup video | `docs/viewer/orbit.mp4` (committed) | Plays even if everything live fails |
-| USD scan asset | `assets/farm_scan.usda` (committed, from the real run) | The 3DGS output as OpenUSD, composing into the twin headless |
+| Garden variant | `docs/viewer-garden/` (same viewer, Mip-NeRF 360 `garden` scene) | Lush-vegetation scene, **PSNR 27.3**, full 360° orbit; stronger "green" visual |
+| Backup video | `docs/viewer/orbit.mp4` + `docs/viewer-garden/orbit.mp4` (committed) | Plays even if everything live fails |
+| USD scan assets | `assets/farm_scan.usda` + `assets/farm_scan_garden.usda` (committed, from the real runs) | The 3DGS outputs as OpenUSD, composing into the twin headless |
 | Decision record | `docs/04` | Verification log, decisions, risk register, claims ledger |
 
 ## How the demo was produced (reproducible, executed 2026-09-27)
@@ -43,6 +44,18 @@ pitch, free Kaggle/Colab only.**
    ~217 x 153 m).
 
 Same notebooks run unchanged on free Colab if Kaggle is unavailable.
+
+## Garden variant (second real run, same day)
+
+`notebooks/gs_garden.ipynb` -> Kaggle kernel `allankariuki/crop-gs-garden`
+(COMPLETE, first green run of this variant): Mip-NeRF 360 `garden` - 185
+photos, 3.0 GB, COLMAP poses included (verified from the zip central
+directory before the run). **PSNR 25.58 @3.5k / 27.29 @7k**, 3,594,793
+gaussians (891.5 MB full PLY), orbit 160 frames @ 1600x1036 (49 MB, full
+360° circle), `farm_scan_garden.usda` 149,784 points (composes into the
+twin - verified), `scan_viewer.ply` 37.1 MB committed as
+`docs/viewer-garden/scan.ply` with its own camera framing computed from the
+PLY bounds. Demo-wise: same pipeline, greener scene, better orbit.
 
 ## Run of show (~10 min)
 

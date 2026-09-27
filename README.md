@@ -15,7 +15,8 @@ see `docs/04_AUDIT_AND_PIVOT.md` (audit + decision record) and
 | Twin demo (tests, layer build, 30-day time-sample replay) | `notebooks/twin_demo.ipynb` | Kaggle CPU kernel (auto-fed by the scan kernel) or Colab, CPU |
 | 3DGS scan pipeline PoC (train on T4, orbit render, PLY -> USD) | `notebooks/gs_scan.ipynb` | Kaggle T4x2 kernel `allankariuki/crop-gs-scan` or free Colab T4 |
 | Browser splat viewer | `docs/viewer/index.html` + committed `scan.ply` / `orbit.mp4` | any static file server (`python -m http.server`) - GitHub Pages needs a public repo |
-| USD scan asset from the real run | `assets/farm_scan.usda` | usd-core |
+| Garden variant (vegetation scene, PSNR 27.3, 360° orbit) | `docs/viewer-garden/index.html` + committed assets | same static server |
+| USD scan assets from the real runs | `assets/farm_scan.usda`, `assets/farm_scan_garden.usda` | usd-core |
 | PLY -> USD converter | `tools/ply_to_usd_points.py` | usd-core only |
 | Decision record / claims ledger | `docs/04_AUDIT_AND_PIVOT.md` | - |
 
