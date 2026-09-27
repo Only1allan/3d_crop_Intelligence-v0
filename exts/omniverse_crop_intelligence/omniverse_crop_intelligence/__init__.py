@@ -15,6 +15,12 @@ with `pip install usd-core`.
 """
 from . import settings  # noqa: F401
 
+# Importing ANY submodule of this package must register the codeless schema
+# plugin FIRST: on usd-core 26.x a plugin registered after the process's first
+# SchemaRegistry use may never propagate (convert-before-build order bit us in
+# rehearsal). schema/__init__ self-registers at import time.
+from . import schema  # noqa: F401,E402
+
 try:  # Kit runtime: expose the IExt subclass for the extension manager.
     from .extension import OmniverseCropIntelligenceExtension  # noqa: F401
 except ImportError:  # headless: omni.* not available, pxr modules still usable.

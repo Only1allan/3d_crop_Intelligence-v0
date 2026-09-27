@@ -12,8 +12,13 @@ _repo/
 # Notebooks
 .ipynb_checkpoints/
 /notebooks/out/
-# Large generated artifacts (downloaded/produced by the Colab notebooks,
-# uploaded to the web viewer via the GitHub web UI - never committed)
+# Large generated artifacts (downloaded/produced by the demo notebooks).
+# Exceptions: the pitch viewer assets (capped 150k-splat PLY + orbit render +
+# metrics) and the real-run USD scan asset are committed on purpose.
 *.ply
 *.zip
 *.mp4
+!docs/viewer/scan.ply
+!docs/viewer/orbit.mp4
+!docs/viewer/metrics.json
+!assets/farm_scan.usda

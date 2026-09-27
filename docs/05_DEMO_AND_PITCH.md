@@ -15,21 +15,32 @@ pitch, free Kaggle/Colab only.**
 | USD scan asset | `assets/farm_scan.usda` (committed, from the real run) | The 3DGS output as OpenUSD, composing into the twin headless |
 | Decision record | `docs/04` | Verification log, decisions, risk register, claims ledger |
 
-## How the demo was produced (reproducible)
+## How the demo was produced (reproducible, executed 2026-09-27)
 
 1. Kaggle dataset `allankariuki/3dcrop-twin-src` = clean `git archive` of
-   `pivot` + py311 wheels (offline pip insurance).
+   `pivot` + py312 wheels (offline pip insurance).
 2. Kaggle kernel `allankariuki/crop-gs-scan` (T4 x2, internet ON) runs
-   `notebooks/gs_scan.ipynb`: clone INRIA repo `--recursive`, compile the three
-   CUDA extensions, download `tandt_db.zip` (COLMAP poses included), train
-   `truck` 7k iters, render the orbit from training cameras sorted by azimuth,
-   convert via `scan_io` to `farm_scan.usda`, cap `scan_viewer.ply` to 150k
-   splats.
+   `notebooks/gs_scan.ipynb`: clone INRIA repo (three CUDA submodules, GLM
+   headers installed - the rotated Kaggle image dropped `libglm-dev`), download
+   `tandt_db.zip` (COLMAP poses included), train `truck` 7k iters
+   (**PSNR 22.36 @3.5k, 24.98 @7k**, 1,697,292 gaussians), render a 160-frame
+   orbit from training cameras sorted by azimuth (978x546, 10.6 MB), convert
+   via `scan_io` to `farm_scan.usda` (141,441 points after the 150k cap), cap
+   `scan_viewer.ply` (35.1 MB, 62 properties preserved).
+   Artifacts are persisted to `/kaggle/working` as they are produced, so a
+   late-cell failure never costs the trained model (learned the hard way:
+   kernel versions 1-10 each caught a different platform failure).
 3. Kaggle kernel `allankariuki/crop-twin-demo` (CPU) attaches the scan kernel's
    output as a data source (`kernel_sources`) and runs `notebooks/twin_demo.ipynb`
-   end-to-end - zero manual upload steps.
-4. Kernel outputs are downloaded, verified structurally (point counts, extents,
-   PSNR), and committed to this repo (viewer PLY + mp4 + metrics + USD asset).
+   end-to-end - zero manual upload steps. Validated locally first via
+   `jupyter nbconvert --execute` (21 tests green, replay, scrub, plot, scan
+   composition).
+4. Kernel outputs are downloaded, verified structurally (point counts,
+   extents, PSNR), and committed to this repo: `docs/viewer/scan.ply` (capped
+   PLY served to the browser viewer), `docs/viewer/orbit.mp4`,
+   `docs/viewer/metrics.json`, `assets/farm_scan.usda` (the real scan as
+   OpenUSD, verified composing under `/World/Farm/FarmScan`, extent
+   ~217 x 153 m).
 
 Same notebooks run unchanged on free Colab if Kaggle is unavailable.
 
