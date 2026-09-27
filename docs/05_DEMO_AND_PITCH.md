@@ -12,6 +12,7 @@ pitch, free Kaggle/Colab only.**
 | GPU notebook | `notebooks/gs_scan.ipynb` (Kaggle T4x2 kernel `allankariuki/crop-gs-scan`, or Colab T4) | Real 3DGS training (7k iters, PSNR), orbit `orbit.mp4` render, `scan.ply` + `scan_viewer.ply` + `farm_scan.usda` export |
 | Browser viewer | `docs/viewer/index.html` + `scan.ply` (committed) - serve locally (`python -m http.server`) or GitHub Pages if the repo ever goes public | Interactive 3D splat, honest badge overlay |
 | Garden variant | `docs/viewer-garden/` (same viewer, Mip-NeRF 360 `garden` scene) | Lush-vegetation scene, **PSNR 27.3**, full 360° orbit; stronger "green" visual |
+| REAL plant growth (4D) | `docs/pitch/pheno_days.png` + `pheno_growth.png/.json`, `assets/pheno_plant.usda` | Pheno4D maize: 12 daily laser scans of the SAME plant as USD time samples, 0.66 m -> 3.66 m, composed into the twin as a session overlay (base files hash-unchanged) |
 | Backup video | `docs/viewer/orbit.mp4` + `docs/viewer-garden/orbit.mp4` (committed) | Plays even if everything live fails |
 | USD scan assets | `assets/farm_scan.usda` + `assets/farm_scan_garden.usda` (committed, from the real runs) | The 3DGS outputs as OpenUSD, composing into the twin headless |
 | Decision record | `docs/04` | Verification log, decisions, risk register, claims ledger |
@@ -56,6 +57,21 @@ gaussians (891.5 MB full PLY), orbit 160 frames @ 1600x1036 (49 MB, full
 twin - verified), `scan_viewer.ply` 37.1 MB committed as
 `docs/viewer-garden/scan.ply` with its own camera framing computed from the
 PLY bounds. Demo-wise: same pipeline, greener scene, better orbit.
+
+## Pheno4D real-growth beat (CPU kernel, no GPU)
+
+`notebooks/pheno4d_demo.ipynb` -> Kaggle kernel `allankariuki/crop-pheno4d-replay`
+(COMPLETE): Pheno4D (Uni Bonn/ETH, PLoS ONE 2021) Maize01 - 12 daily
+sub-millimeter laser scans of the same plant, authored as **USD time
+samples** on one `UsdGeomPoints` prim (`assets/pheno_plant.usda`, 47 MB),
+then composed into the farm stage **as a session-layer overlay** - the farm
+files stay byte-identical (sha256-proven in the kernel log) and the base
+stage alone shows no plant (overlay is session-only). Real heights from the
+scans: 0.664 m (Mar 13) -> 3.660 m (Mar 25). Pitch visual:
+`docs/pitch/pheno_days.png` (day 1 / 6 / 12 rendered from the actual USD
+time samples) and `docs/pitch/pheno_growth.png` (height curve).
+Honesty: greenhouse laser scans, not a field, not photos->3DGS - it is the
+twin's 4D time-sample mechanic fed with real agricultural data.
 
 ## Run of show (~10 min)
 

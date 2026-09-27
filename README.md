@@ -16,6 +16,7 @@ see `docs/04_AUDIT_AND_PIVOT.md` (audit + decision record) and
 | 3DGS scan pipeline PoC (train on T4, orbit render, PLY -> USD) | `notebooks/gs_scan.ipynb` | Kaggle T4x2 kernel `allankariuki/crop-gs-scan` or free Colab T4 |
 | Browser splat viewer | `docs/viewer/index.html` + committed `scan.ply` / `orbit.mp4` | any static file server (`python -m http.server`) - GitHub Pages needs a public repo |
 | Garden variant (vegetation scene, PSNR 27.3, 360° orbit) | `docs/viewer-garden/index.html` + committed assets | same static server |
+| REAL plant growth as 4D USD (Pheno4D, 12 daily scans, session overlay) | `docs/pitch/pheno_days.png`, `assets/pheno_plant.usda` | usd-core |
 | USD scan assets from the real runs | `assets/farm_scan.usda`, `assets/farm_scan_garden.usda` | usd-core |
 | PLY -> USD converter | `tools/ply_to_usd_points.py` | usd-core only |
 | Decision record / claims ledger | `docs/04_AUDIT_AND_PIVOT.md` | - |

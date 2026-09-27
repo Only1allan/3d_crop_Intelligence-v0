@@ -1,0 +1,74 @@
+[
+ {
+  "date": "0313",
+  "points_raw": 1554168,
+  "points_usd": 59776,
+  "height_m": 0.664
+ },
+ {
+  "date": "0314",
+  "points_raw": 1641908,
+  "points_usd": 58640,
+  "height_m": 0.88
+ },
+ {
+  "date": "0315",
+  "points_raw": 1301557,
+  "points_usd": 59162,
+  "height_m": 1.15
+ },
+ {
+  "date": "0316",
+  "points_raw": 1026080,
+  "points_usd": 57005,
+  "height_m": 1.352
+ },
+ {
+  "date": "0317",
+  "points_raw": 803846,
+  "points_usd": 57418,
+  "height_m": 1.823
+ },
+ {
+  "date": "0318",
+  "points_raw": 337476,
+  "points_usd": 56246,
+  "height_m": 2.486
+ },
+ {
+  "date": "0319",
+  "points_raw": 860826,
+  "points_usd": 57389,
+  "height_m": 2.846
+ },
+ {
+  "date": "0320",
+  "points_raw": 527758,
+  "points_usd": 58640,
+  "height_m": 2.825
+ },
+ {
+  "date": "0321",
+  "points_raw": 1114990,
+  "points_usd": 58684,
+  "height_m": 2.965
+ },
+ {
+  "date": "0322",
+  "points_raw": 805391,
+  "points_usd": 57528,
+  "height_m": 3.706
+ },
+ {
+  "date": "0324",
+  "points_raw": 1214597,
+  "points_usd": 57838,
+  "height_m": 3.753
+ },
+ {
+  "date": "0325",
+  "points_raw": 1407956,
+  "points_usd": 58665,
+  "height_m": 3.66
+ }
+]
