@@ -69,8 +69,10 @@ Same notebooks run unchanged on free Colab if Kaggle is unavailable.
       (`--recursive`, `--test_iterations`, `--disable_viewer`, new log format).
 - [x] `scan_io` numpy fast-path fixed + equivalence test (21 tests green).
 - [x] GPU run completed on Kaggle; artifacts verified + committed
-      (see `docs/viewer/metrics.json` for PSNR).
-- [x] Twin kernel ran end-to-end on Kaggle; outputs on the kernel page.
+      (`docs/viewer/metrics.json`: PSNR 22.36 @3.5k / 24.98 @7k; both kernels
+      show status COMPLETE - `crop-gs-scan` v12, `crop-twin-demo` v3).
+- [x] Twin kernel ran end-to-end on Kaggle; outputs on the kernel page,
+      including the full 1,695,890-point scan composing into the twin.
 - [x] `orbit.mp4` + viewer PLY committed under `docs/viewer/`.
 - [ ] On the pitch laptop: `cd docs/viewer && python -m http.server 8000`
       -> `http://localhost:8000` (serves the interactive viewer; file:// will
