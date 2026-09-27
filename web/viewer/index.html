@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Omniverse Crop Intelligence - 3DGS Farm Scan (PoC)</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0f14; color: #e8edf2;
+               font: 14px/1.45 system-ui, sans-serif; overflow: hidden; }
+  #app { position: fixed; inset: 0; }
+  #panel { position: fixed; top: 16px; left: 16px; max-width: 380px; z-index: 10;
+           background: rgba(11, 15, 20, .88); border: 1px solid #26313d;
+           border-radius: 10px; padding: 14px 16px; }
+  #panel h1 { font-size: 15px; margin: 0 0 6px; letter-spacing: .2px; }
+  #panel p  { margin: 4px 0; color: #aab7c4; font-size: 12.5px; }
+  #panel .badge { display: inline-block; padding: 2px 8px; border-radius: 999px;
+                  font-size: 11px; background: #14351f; color: #7ddc95; margin-right: 6px; }
+  #panel .badge.gray { background: #232c36; color: #aab7c4; }
+  #err { position: fixed; inset: auto 16px 16px 16px; max-width: 520px; z-index: 20;
+         background: #3a1518; border: 1px solid #7a2c31; border-radius: 10px;
+         padding: 12px 14px; display: none; font-size: 12.5px; }
+  #err a { color: #9ecbff; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+    "@mkkellogg/gaussian-splats-3d": "https://cdn.jsdelivr.net/npm/@mkkellogg/gaussian-splats-3d@0.4.7/build/gaussian-splats-3d.module.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app"></div>
+<div id="panel">
+  <h1>Omniverse Crop Intelligence</h1>
+  <p><span class="badge">REAL GPU run</span><span class="badge gray">public capture PoC</span></p>
+  <p>3D Gaussian Splatting trained on a free Colab T4 (7k iters) from the INRIA
+     public reference capture - the pipeline proof for the farm scan (Phase 3).
+     The capture is <b>not</b> a farm; the field-scan pipeline is the claim.</p>
+  <p>The same .ply is converted to OpenUSD (<code>scan_io</code>) and composes
+     into the farm twin layer stack headless. GoMyCode x NVIDIA hackathon, 2026-09-27.</p>
+</div>
+<div id="err"></div>
+<script type="module">
+const errBox = document.getElementById('err');
+function fail(msg) {
+  errBox.style.display = 'block';
+  errBox.innerHTML = '<b>Viewer could not load.</b> ' + msg +
+    '<br>Fallback: watch <a href="./orbit.mp4">orbit.mp4</a> or open the twin notebook.';
+}
+try {
+  const GaussianSplats3D = await import('@mkkellogg/gaussian-splats-3d');
+  const viewer = new GaussianSplats3D.Viewer({
+    rootElement: document.getElementById('app'),
+    sharedMemoryForWorkers: false,
+    gpuAcceleratedSort: false,
+  });
+  await viewer.addSplatScene('./scan.ply', { showLoadingUI: true });
+  viewer.start();
+} catch (e) {
+  fail('Detail: ' + (e && e.message ? e.message : e) +
+       '<br>If this is a missing-file error, upload <code>scan.ply</code> next to this page.');
+}
+</script>
+</body>
+</html>

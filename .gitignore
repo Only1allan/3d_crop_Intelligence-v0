@@ -9,3 +9,11 @@ _repo/
 *.log
 # Generated at runtime by StageBuilder when the user picks a custom output dir
 /build_layers/
+# Notebooks
+.ipynb_checkpoints/
+/notebooks/out/
+# Large generated artifacts (downloaded/produced by the Colab notebooks,
+# uploaded to the web viewer via the GitHub web UI - never committed)
+*.ply
+*.zip
+*.mp4
