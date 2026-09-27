@@ -58,6 +58,17 @@ twin - verified), `scan_viewer.ply` 37.1 MB committed as
 `docs/viewer-garden/scan.ply` with its own camera framing computed from the
 PLY bounds. Demo-wise: same pipeline, greener scene, better orbit.
 
+**Viewer fidelity upgrade + orientation (2026-09-27, post-run):** both
+viewers now serve **330,000-splat PLYs (81.8 MB each)** resampled from the
+full models (truck 1.70M, garden 3.59M gaussians) with
+opacity x sqrt(scale-volume) weighted sampling - visually important splats
+kept preferentially instead of blind stride. The splat renderer itself was
+never the limit; the commit-size cap was. Garden orientation root-caused
+with the capture's own COLMAP camera up-vectors (mean world-up parsed from
+`sparse/0/images.bin`: truck (0.04, 0.98, 0.20), garden (0.01, 0.91, 0.42)
+- both +Y up); the reported "upside down" was a 180° yaw (back side of the
+scene), fixed by mirroring the default camera azimuth.
+
 ## Pheno4D real-growth beat (CPU kernel, no GPU)
 
 `notebooks/pheno4d_demo.ipynb` -> Kaggle kernel `allankariuki/crop-pheno4d-replay`

@@ -101,8 +101,8 @@
 
 <script type="module">
 const CENTER = [-0.02, 1.93, 1.25];          // scene median (COLMAP Y-up world)
-const HOME   = [-24.35, -4.17, -23.11];               // framing shot that fills the view
-const TOP    = [-0.02, -34.57, 1.25];           // near-straight-down field view
+const HOME   = [-24.33, 8.02, -23.11];               // framing shot that fills the view
+const TOP    = [-0.02, 38.47, 1.25];           // near-straight-down field view
 stage.textContent = 'fetching 3D modules (CDN)\u2026';
 try {
   const GaussianSplats3D = await import('@mkkellogg/gaussian-splats-3d');
@@ -111,7 +111,7 @@ try {
     rootElement: document.getElementById('app'),
     sharedMemoryForWorkers: false,
     gpuAcceleratedSort: false,
-    cameraUp: [0, -1, 0],
+    cameraUp: [0, 1, 0],
     initialCameraPosition: HOME,
     initialCameraLookAt: CENTER,
     antialiased: true,
