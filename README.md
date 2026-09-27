@@ -1,61 +1,71 @@
 # Omniverse Crop Intelligence
 
-Agricultural digital twin that merges the **AgriFusion** soil platform
-(`../ai-kenya`) and the **FarmWise** potato project (`../agriLegends`) into one
-OpenUSD scene: codeless `FarmSensorAPI`/`FarmZoneAPI`/`CropModelStateAPI`
-schemas, a tested four-layer stack (`RUNTIME > SIM > DATA > ASSET`, root layer
-never authors prims), and a single enforced write path for live values.
+**Your farm, digitized. And able to talk back.**
 
-**Hackathon demo (2026-09-27):** the demo substrate is notebook + browser —
-see `docs/04_AUDIT_AND_PIVOT.md` (audit + decision record) and
-`docs/05_DEMO_AND_PITCH.md` (run of show, fallbacks).
+A 3D digital twin of the farm, built on OpenUSD for NVIDIA Omniverse, that
+farmers can talk to. Click a plot, see its intelligence, ask it anything.
 
-| Demo artifact | Path | Needs |
-|---|---|---|
-| Twin demo (tests, layer build, 30-day time-sample replay) | `notebooks/twin_demo.ipynb` | Kaggle CPU kernel (auto-fed by the scan kernel) or Colab, CPU |
-| 3DGS scan pipeline PoC (train on T4, orbit render, PLY -> USD) | `notebooks/gs_scan.ipynb` | Kaggle T4x2 kernel `allankariuki/crop-gs-scan` or free Colab T4 |
-| Browser splat viewer | `docs/viewer/index.html` + committed `scan.ply` / `orbit.mp4` | any static file server (`python -m http.server`) - GitHub Pages needs a public repo |
-| Garden variant (vegetation scene, PSNR 27.3, 360° orbit) | `docs/viewer-garden/index.html` + committed assets | same static server |
-| REAL plant growth as 4D (Pheno4D, 12 daily scans) | `docs/viewer/pheno.html` - browser growth scrubber over USD time samples | same static server (`cd docs && python3 -m http.server 8000`) |
-| USD scan assets from the real runs | `assets/farm_scan.usda`, `assets/farm_scan_garden.usda` | usd-core |
-| PLY -> USD converter | `tools/ply_to_usd_points.py` | usd-core only |
-| Decision record / claims ledger | `docs/04_AUDIT_AND_PIVOT.md` | - |
+## The problem
 
-**Status: Phase 1 (3D foundation) done and verified headless (21 tests on
-`usd-core==26.8`); demo pipeline executed end-to-end on free Kaggle kernels
-(real 3DGS training + conversion + replay); in-Kit smoke test deferred to the
-post-hackathon runtime.** See `docs/00_PHASE_PLAN.md` and `docs/05`.
+Farmers make the calls that decide a season blind: irrigate or not, lime or
+not, spray or not. The data that would answer them exists in fragments: a soil
+lab PDF, a weather app, a field notebook. There is no single view of the farm,
+and no way to simply ask it a question. The cost is wasted water, wasted
+inputs and crop loss that could have been prevented.
 
-```
-omniverse_crop_intelligence/
-  AGENTS.md / CLAUDE.md          session brief for AI agents (read first)
-  docs/                          plan, mapping report, architecture, Phase 2 handoff, audit
-  exts/omniverse_crop_intelligence/
-    config/extension.toml        Kit manifest
-    omniverse_crop_intelligence/ extension.py, stage_builder.py, sensor_manager.py, scan_io.py, schema/, ui/, phase2/
-    tests/                       headless (usd-core) + Kit-only (importorskip-guarded)
-  apps/omniverse_crop_intelligence.kit   minimal Kit app (post-hackathon runtime)
-  notebooks/                     twin_demo.ipynb, gs_scan.ipynb, replay data
-  tools/                         gen_schema.py, build_layers_headless.py, ply_to_usd_points.py
-  docs/viewer/                   browser splat viewer (static, no build step; Pages serves /docs)
-  assets/layers/                 sample generated layer stack (usdview-able)
-```
+## The solution
 
-## Quick start (no Kit, no GPU needed)
+One digital twin of the farm, built in three layers.
+
+| Layer | What it does |
+|---|---|
+| **Ingestion** | Every plot in 3D, with the data around it: soil chemistry, pH, weather, crop signals |
+| **Processing** | Raw data becomes insight: crop health, stress and blight-risk flags, growth stage, yield outlook |
+| **Communication** | The farmer talks to those insights, by text or voice. WhatsApp and SMS next |
+
+Ask "Should I irrigate the South Slope?" and get an answer built from that
+plot's own numbers: moisture fell from 21% to 13.2% this week, below the 18%
+floor, during tuber initiation, so irrigate today.
+
+## Why it is different
+
+- **A farm you talk to**, not charts you have to interpret.
+- **An interactive 3D twin**, plot by plot, not a flat map.
+- **One data model for the whole farm** on OpenUSD, so a real sensor drops in without renaming anything.
+- **Honest by design**: every answer shows its sources, and every screen labels what is real.
+
+## Try the demo
 
 ```bash
-python -m venv .venv && . .venv/bin/activate
-pip install -r requirements-dev.txt          # usd-core==26.8 pinned
-pytest exts/omniverse_crop_intelligence/tests/ -q
-python tools/build_layers_headless.py --out assets/layers --demo --overwrite
-python tools/ply_to_usd_points.py --input scan.ply   # after gs_scan.ipynb
+cd web && npm install && npm run dev    # http://localhost:5173
 ```
 
-## In Omniverse Kit (post-hackathon runtime)
+Open the farm, click a plot, ask it anything. No login. Add a free OpenRouter
+key in `web/.env.local` for live AI answers; without one, the advisor answers
+offline from the same data.
 
-```bash
-# Kit SDK / kit-app-template
-kit apps/omniverse_crop_intelligence.kit
-# or in USD Composer / Isaac Sim: Extensions > add ./exts to search paths > enable omniverse_crop_intelligence
-```
-Window > Crop Intelligence: Build Farm Stage, Spawn 3 Test Sensors, Simulate Telemetry Tick, Clear Runtime Layer.
+## Toolkit
+
+| Area | Tools |
+|---|---|
+| Digital twin | OpenUSD (custom farm sensor schema, layered stage), NVIDIA Omniverse Kit extension |
+| AI advisor | NVIDIA Nemotron 3 Super via OpenRouter, in-browser retrieval over the plot data, Web Speech API for voice |
+| 3D scanning | 3D Gaussian Splatting trained on **NVIDIA Brev** GPU instances, with free Kaggle / Colab T4 as fallback |
+| 4D growth | Pheno4D real maize laser scans replayed as USD time samples |
+| Web app | React, Vite, Three.js, React Three Fiber, Framer Motion |
+| Tooling | Python, pytest, Jupyter notebooks |
+
+## What is real today
+
+- **Real:** the 3D twin, the AI conversation, the OpenUSD schema and its tests, the 3D scan training runs, and the plant-growth replay from real laser scans.
+- **Synthetic:** plot values (on the real schema). Yield and blight values are placeholders until the models run.
+- **Not yet:** live sensors, a scan of our own farm, and a run inside Omniverse Kit on RTX.
+
+## Roadmap
+
+1. WhatsApp and SMS access to the same advisor
+2. Live soil, weather and satellite data through AWS IoT
+3. Yield (SUBSTOR) and blight (SimCast) models behind the insights
+4. A drone scan of a real partner farm, and the full Omniverse Kit / RTX runtime
+
+GoMyCode × NVIDIA Hackathon 2026.
