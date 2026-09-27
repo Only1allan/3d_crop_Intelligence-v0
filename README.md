@@ -14,7 +14,7 @@ see `docs/04_AUDIT_AND_PIVOT.md` (audit + decision record) and
 |---|---|---|
 | Twin demo (tests, layer build, 30-day time-sample replay) | `notebooks/twin_demo.ipynb` | free Colab, CPU |
 | 3DGS scan pipeline PoC (train on T4, flythrough, PLY) | `notebooks/gs_scan.ipynb` | free Colab T4 |
-| Browser splat viewer | `web/viewer/index.html` + `scan.ply` | GitHub Pages |
+| Browser splat viewer | `docs/viewer/index.html` + `scan.ply` (GitHub Pages: deploy from `main`, `/docs` folder) | GitHub Pages |
 | PLY -> USD converter | `tools/ply_to_usd_points.py` | usd-core only |
 | Decision record / claims ledger | `docs/04_AUDIT_AND_PIVOT.md` | - |
 
@@ -33,7 +33,7 @@ omniverse_crop_intelligence/
   apps/omniverse_crop_intelligence.kit   minimal Kit app (post-hackathon runtime)
   notebooks/                     twin_demo.ipynb, gs_scan.ipynb, replay data
   tools/                         gen_schema.py, build_layers_headless.py, ply_to_usd_points.py
-  web/viewer/                    browser splat viewer (static, no build step)
+  docs/viewer/                   browser splat viewer (static, no build step; Pages serves /docs)
   assets/layers/                 sample generated layer stack (usdview-able)
 ```
 

@@ -10,7 +10,7 @@ pitch, free Colab/Kaggle only, browser-only workstations.**
 |---|---|---|
 | Twin notebook | `notebooks/twin_demo.ipynb` (Colab, CPU is fine) | 18 green invariant tests, layer stack build, layer separation, 30-day time-sample replay + scrub, farm map, optional scan composition |
 | GPU notebook | `notebooks/gs_scan.ipynb` (Colab, T4) | Real 3DGS training (~7k iters, PSNR printed), flythrough mp4, `scan.ply` export |
-| Browser viewer | `web/viewer/index.html` (+ `scan.ply` uploaded) via GitHub Pages | Interactive 3D splat on any laptop/phone, honest badge overlay |
+| Browser viewer | `docs/viewer/index.html` (+ `scan.ply` uploaded) via GitHub Pages (branch `main`, folder `/docs`) | Interactive 3D splat on any laptop/phone, honest badge overlay |
 | Backup video | `orbit.mp4` (committed or linked) | Plays even if everything live fails |
 | Decision record | `docs/04` | Verification log, decisions, risk register, claims ledger |
 
@@ -35,9 +35,10 @@ pitch, free Colab/Kaggle only, browser-only workstations.**
 ## Pre-pitch checklist (T-60 min)
 
 - [ ] Repo pushed to `main` (notebooks, viewer page, docs).
-- [ ] GitHub Pages enabled for `web/viewer/` (Settings > Pages) or viewer
-      opened from the raw repo page fallback.
-- [ ] `scan.ply` (<100 MB) uploaded next to `index.html` via GitHub web UI.
+- [ ] GitHub Pages enabled: Settings > Pages > Deploy from branch `main`,
+      folder `/docs`. Viewer URL:
+      `https://only1allan.github.io/3d_crop_Intelligence-v0/viewer/`
+- [ ] `scan.ply` (<100 MB) uploaded to `docs/viewer/` via GitHub web UI.
 - [ ] Twin notebook ran end-to-end once today; outputs left in place.
 - [ ] gs notebook: training done once, `orbit.mp4` downloaded and committed;
       PLY size checked.
@@ -50,8 +51,7 @@ pitch, free Colab/Kaggle only, browser-only workstations.**
 |---|---|
 | Colab cold-start slow at pitch time | pre-run notebook with outputs + orbit.mp4 |
 | No T4 granted today | Kaggle P100/T4x2, or show pre-trained run + logs |
-| Pages viewer broken in venue browser | mp4 + SuperSplat share link (upload PLY at supersplat.playcanvas.com) |
-| Judge asks for sensor data | claims ledger (docs/04 §10): schema supports, values are synthetic, IoT is Phase 2 - never bluff |
+| Pages viewer broken in venue browser | mp4 + SuperSplat share link (upload PLY at supersplat.playcanvas.com) || Judge asks for sensor data | claims ledger (docs/04 §10): schema supports, values are synthetic, IoT is Phase 2 - never bluff |
 
 ## Hard pushbacks (do not do these at the venue)
 
