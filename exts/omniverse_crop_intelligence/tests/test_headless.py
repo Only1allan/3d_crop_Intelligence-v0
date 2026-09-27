@@ -172,7 +172,18 @@ def test_ingestor_pump_writes_without_structure_changes(stack):
 def test_substor_bridge_aggregates_zone_sensors(stack):
     mgr = SensorManager(stack)
     mgr.spawn_test_sensors(seed_runtime_values=True)
-    inp = SubstorBridge(stack.stage, RuntimeWriter(stack)).collect_daily_input("Zone_DemoPlot", "2026-09-26")
+    bridge = SubstorBridge(stack.stage, RuntimeWriter(stack))
+    inp = bridge.collect_daily_input("Zone_DemoPlot", "2026-09-26")
     assert inp.tmax == pytest.approx(24.1) and inp.tmin == pytest.approx(11.8)
     assert inp.soil_moisture == pytest.approx(27.5)
-    assert inp.srad == 0.0, "no legacy source for SRAD; must be flagged in Phase 2"
+    assert inp.srad is None, "no authored solarRadiation anywhere: schema fallbacks are not measurements"
+
+    # Authored zeros are real measurements (a dry day), never dropped; a
+    # second sensor with no temperature attrs contributes nothing.
+    mgr.spawn_sensor(SensorSpec("WeatherStation_E", (10.0, -5.0, 0.0), kind="weather_station",
+                                source="farmwise_snapshot", zone_id="Zone_DemoPlot"))
+    RuntimeWriter(stack).write_sensor("WeatherStation_E", {"temperatureMin": 0.0, "precipitation": 0.0})
+    inp2 = bridge.collect_daily_input("Zone_DemoPlot", "2026-09-27")
+    assert inp2.tmin == pytest.approx((0.0 + 11.8) / 2.0), "authored 0.0 must be averaged, not dropped"
+    assert inp2.rain == pytest.approx((6.2 + 0.0) / 2.0), "authored 0.0 rain is a dry day, not missing"
+    assert inp2.srad is None

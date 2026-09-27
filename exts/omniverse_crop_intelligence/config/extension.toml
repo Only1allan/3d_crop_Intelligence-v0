@@ -35,8 +35,10 @@ python = "3.10,3.11"
 name = "omniverse_crop_intelligence"
 
 [settings]
-# omniverse:// requires a running Nucleus; a local path (file:///...) also works.
-exts."omniverse_crop_intelligence".farmAssetPath = "omniverse://localhost/Projects/Farm/farm_scan.usd"
+# Relative path resolves next to ASS_LYR.usda (no Nucleus needed);
+# tools/ply_to_usd_points.py writes farm_scan.usda into the layers folder.
+# An omniverse:// URL also works when a Nucleus server is available.
+exts."omniverse_crop_intelligence".farmAssetPath = "./farm_scan.usda"
 # Where the .usda sublayer stack is generated. carb tokens are resolved.
 exts."omniverse_crop_intelligence".layerOutputDir = "${omni_documents}/omniverse_crop_intelligence/layers"
 # Build the stage as soon as the extension loads (handy for demos / app files).

@@ -27,20 +27,21 @@ from __future__ import annotations
 
 import queue
 from dataclasses import dataclass, field
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from .runtime_writer import RuntimeWriter
 
 
 @dataclass
 class TelemetryMessage:
-    """Normalised payload. Keys in `values` are FarmSensorAPI short names."""
+    """Normalised payload. Keys in `values` are FarmSensorAPI short names.
+    Values are numeric measurements or status tokens ("nominal", ...)."""
     sensor_id: str
-    values: Dict[str, float]
+    values: Dict[str, Union[float, str]]
     timestamp: float
     source: str = "aws_iot_core"
     zone_id: Optional[str] = None
-    zone_values: Dict[str, object] = field(default_factory=dict)
+    zone_values: Dict[str, Union[float, str]] = field(default_factory=dict)
 
 
 class TelemetryIngestor:

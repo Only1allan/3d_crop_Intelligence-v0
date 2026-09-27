@@ -31,7 +31,7 @@ they compose as RUNTIME_LYR overrides (no reload, undo-able, clearable).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from pxr import Usd
 
@@ -44,12 +44,15 @@ from .runtime_writer import RuntimeWriter
 class SubstorDailyInput:
     zone_id: str
     date: str               # YYYY-MM-DD
-    srad: float             # MJ/m2/day
-    tmax: float             # degC
-    tmin: float             # degC
-    rain: float             # mm
-    soil_moisture: float    # % VWC (zone mean)
-    nitrogen: float         # % total N (zone mean)
+    srad: Optional[float]             # MJ/m2/day
+    tmax: Optional[float]             # degC
+    tmin: Optional[float]             # degC
+    rain: Optional[float]             # mm
+    soil_moisture: Optional[float]    # % VWC (zone mean)
+    nitrogen: Optional[float]         # % total N (zone mean)
+    # None means NO sensor authored a measurement for that driver on the
+    # zone; 0.0 means a real measurement of zero. Phase 2 must treat these
+    # differently (substitute satellite-derived SRAD vs. a dry day).
 
 
 class SubstorBridge:
@@ -61,7 +64,11 @@ class SubstorBridge:
         """
         Aggregate the sensors linked to a zone into one SUBSTOR daily record.
         Implemented now (pure reads) so Phase 2 only has to add the model call.
-        Missing drivers come back as 0.0 and must be flagged by the caller.
+
+        A driver is None when no zone-linked sensor has an AUTHORED value for
+        it: schema fallbacks (e.g. soilMoisture == 0.0 on a probe that never
+        measured) are defaults, not measurements. Authored zeros are kept --
+        rain == 0.0 mm is a dry day, not missing data.
         """
         zone_path = f"{S.ZONES_PATH}/{zone_id}"
         sensors: List[FarmSensorAPI] = []
@@ -70,9 +77,15 @@ class SubstorBridge:
             if api and zone_path in [str(t) for t in api.GetZoneRel().GetTargets()]:
                 sensors.append(api)
 
-        def mean(name: str) -> float:
-            vals = [api.get(name) for api in sensors if api.get(name) not in (None, 0.0)]
-            return float(sum(vals) / len(vals)) if vals else 0.0
+        def mean(name: str) -> Optional[float]:
+            vals: List[float] = []
+            for api in sensors:
+                attr = api.attr(name)
+                if attr.HasAuthoredValue():
+                    v = attr.Get()
+                    if v is not None:
+                        vals.append(float(v))
+            return sum(vals) / len(vals) if vals else None
 
         return SubstorDailyInput(
             zone_id=zone_id, date=date,

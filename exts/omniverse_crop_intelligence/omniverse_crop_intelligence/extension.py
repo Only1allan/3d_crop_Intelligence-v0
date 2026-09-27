@@ -22,7 +22,6 @@ import carb
 import carb.settings
 import carb.tokens
 import omni.ext
-import omni.kit.app
 import omni.ui as ui
 import omni.usd
 from pxr import Sdf, Usd
@@ -53,6 +52,9 @@ class OmniverseCropIntelligenceExtension(omni.ext.IExt):
         self._sensors: Optional[SensorManager] = None
         self._writer: Optional[RuntimeWriter] = None
         self._menu = None
+        # One RNG per extension instance: seeding per tick from the wall clock
+        # made two ticks within the same second produce identical sequences.
+        self._rng = random.Random()
 
         self.farm_asset_path: str = self._settings.get(S.SETTING_FARM_ASSET_PATH) or S.DEFAULT_FARM_ASSET_PATH
         self.layer_output_dir: str = self._resolve_output_dir(self._settings.get(S.SETTING_LAYER_OUTPUT_DIR))
@@ -126,7 +128,7 @@ class OmniverseCropIntelligenceExtension(omni.ext.IExt):
         except Exception:  # noqa: BLE001
             resolved = value
         if "${" in resolved:  # token not defined in this app
-            resolved = os.path.join(os.path.expanduser("~"), "Documents", S.EXTENSION_NAME, "layers")
+            resolved = os.path.join(os.path.expanduser("~"), S.EXTENSION_NAME, "layers")
         return os.path.abspath(resolved)
 
     def _require_stack(self) -> LayerStack:
@@ -180,7 +182,7 @@ class OmniverseCropIntelligenceExtension(omni.ext.IExt):
         exercises the exact write path that ingestion will use.
         """
         stack = self._require_stack()
-        rng = random.Random(int(time.time()))
+        rng = self._rng
         now = time.time()
         n = 0
         for prim in self._sensors.list_sensors():

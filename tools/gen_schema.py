@@ -10,7 +10,6 @@ Runs usdGenSchema (shipped inside the pxr package) and patches the
 from __future__ import annotations
 
 import os
-import runpy
 import subprocess
 import sys
 

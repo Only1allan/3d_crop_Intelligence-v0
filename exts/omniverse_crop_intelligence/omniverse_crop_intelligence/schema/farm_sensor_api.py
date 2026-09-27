@@ -12,7 +12,7 @@ prim so edits made through Usd.EditContext land in the intended layer.
 """
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Optional
 
 from pxr import Sdf, Usd
 
@@ -57,8 +57,12 @@ class _AppliedAPI:
         return self._prim
 
     # -- generic attribute access -------------------------------------------
-    def _qualify(self, name: str) -> str:
+    def qualify(self, name: str) -> str:
+        """Short attr name -> namespaced ("soilMoisture" -> "farmSensor:soilMoisture")."""
         return name if ":" in name else f"{self.NAMESPACE}:{name}"
+
+    # Backwards-compatible alias for older call sites.
+    _qualify = qualify
 
     def attr(self, name: str) -> Usd.Attribute:
         a = self._prim.GetAttribute(self._qualify(name))
@@ -81,12 +85,6 @@ class _AppliedAPI:
         with Sdf.ChangeBlock():
             for k, v in values.items():
                 self.set(k, v, time)
-
-    def values(self, names: Optional[Iterable[str]] = None) -> Dict[str, Any]:
-        if names is None:
-            names = [p.GetName() for p in self._prim.GetAttributes()
-                     if p.GetName().startswith(self.NAMESPACE + ":")]
-        return {self._qualify(n): self.get(n) for n in names}
 
 
 class FarmSensorAPI(_AppliedAPI):

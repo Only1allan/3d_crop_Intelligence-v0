@@ -5,17 +5,22 @@ In-Kit tests (omni.kit.test). Run with:
         --exec "omni.kit.test" --/exts/omni.kit.test/testExtension=omniverse_crop_intelligence
 
 or via the Kit App Template `repo test` flow. Headless USD invariants are in
-test_headless.py; this file only checks the Kit glue.
+test_headless.py; this file only checks the Kit glue. It skips itself when
+`omni.*` is absent (plain pytest / CI without Kit).
 """
 import os
 import tempfile
 
-import omni.kit.test
-import omni.ui as ui
-import omni.usd
+import pytest
 
-from omniverse_crop_intelligence import settings as S
-from omniverse_crop_intelligence.extension import get_instance
+omni = pytest.importorskip("omni", reason="Kit-only test: omni.* is not importable headless")
+
+import omni.kit.test  # noqa: E402
+import omni.ui as ui  # noqa: E402
+import omni.usd  # noqa: E402
+
+from omniverse_crop_intelligence import settings as S  # noqa: E402
+from omniverse_crop_intelligence.extension import get_instance  # noqa: E402
 
 
 class TestCropIntelligenceExtension(omni.kit.test.AsyncTestCase):

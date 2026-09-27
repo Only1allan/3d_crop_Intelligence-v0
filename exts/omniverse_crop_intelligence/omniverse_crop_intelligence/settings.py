@@ -20,7 +20,12 @@ SETTING_LAYER_OUTPUT_DIR = f"{SETTINGS_ROOT}/layerOutputDir"
 SETTING_AUTO_BUILD = f"{SETTINGS_ROOT}/autoBuildOnStartup"
 SETTING_SPAWN_TEST_SENSORS = f"{SETTINGS_ROOT}/spawnTestSensorsOnBuild"
 
-DEFAULT_FARM_ASSET_PATH = "omniverse://localhost/Projects/Farm/farm_scan.usd"
+# Farm scan asset referenced by ASS_LYR. A relative path resolves next to
+# ASS_LYR.usda itself, so the stack is relocatable and works with zero
+# infrastructure (no Nucleus): tools/ply_to_usd_points.py writes
+# farm_scan.usda into the same folder as the layers. An omniverse:// URL
+# remains valid here when a Nucleus server is available.
+DEFAULT_FARM_ASSET_PATH = "./farm_scan.usda"
 DEFAULT_LAYER_OUTPUT_DIR = "${omni_documents}/omniverse_crop_intelligence/layers"
 
 # ---------------------------------------------------------------------------

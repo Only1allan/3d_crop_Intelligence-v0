@@ -1,5 +1,7 @@
 # Headless (no Omniverse Kit) development + test toolchain.
 # Inside Kit, pxr/omni.* come from the SDK; these are only for CI / local checks.
-usd-core>=25.5
+# usd-core is pinned exactly for the demo freeze: 26.8 (2026-07-20) ships
+# cp310-cp314 wheels; Kit 106/107-era USD must still READ what we generate.
+usd-core==26.8
 jinja2>=3.1
 pytest>=8.0
