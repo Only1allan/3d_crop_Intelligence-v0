@@ -12,15 +12,17 @@ see `docs/04_AUDIT_AND_PIVOT.md` (audit + decision record) and
 
 | Demo artifact | Path | Needs |
 |---|---|---|
-| Twin demo (tests, layer build, 30-day time-sample replay) | `notebooks/twin_demo.ipynb` | free Colab, CPU |
-| 3DGS scan pipeline PoC (train on T4, flythrough, PLY) | `notebooks/gs_scan.ipynb` | free Colab T4 |
-| Browser splat viewer | `docs/viewer/index.html` + `scan.ply` (GitHub Pages: deploy from `main`, `/docs` folder) | GitHub Pages |
+| Twin demo (tests, layer build, 30-day time-sample replay) | `notebooks/twin_demo.ipynb` | Kaggle CPU kernel (auto-fed by the scan kernel) or Colab, CPU |
+| 3DGS scan pipeline PoC (train on T4, orbit render, PLY -> USD) | `notebooks/gs_scan.ipynb` | Kaggle T4x2 kernel `allankariuki/crop-gs-scan` or free Colab T4 |
+| Browser splat viewer | `docs/viewer/index.html` + committed `scan.ply` / `orbit.mp4` | any static file server (`python -m http.server`) - GitHub Pages needs a public repo |
+| USD scan asset from the real run | `assets/farm_scan.usda` | usd-core |
 | PLY -> USD converter | `tools/ply_to_usd_points.py` | usd-core only |
 | Decision record / claims ledger | `docs/04_AUDIT_AND_PIVOT.md` | - |
 
-**Status: Phase 1 (3D foundation) done and verified headless (18 tests on
-`usd-core==26.8`); in-Kit smoke test deferred to the post-hackathon runtime.**
-See `docs/00_PHASE_PLAN.md`.
+**Status: Phase 1 (3D foundation) done and verified headless (21 tests on
+`usd-core==26.8`); demo pipeline executed end-to-end on free Kaggle kernels
+(real 3DGS training + conversion + replay); in-Kit smoke test deferred to the
+post-hackathon runtime.** See `docs/00_PHASE_PLAN.md` and `docs/05`.
 
 ```
 omniverse_crop_intelligence/

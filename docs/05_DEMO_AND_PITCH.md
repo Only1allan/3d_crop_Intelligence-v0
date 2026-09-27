@@ -2,17 +2,36 @@
 
 Operational companion to `docs/04_AUDIT_AND_PIVOT.md` (the decision record).
 Everything here assumes the accepted pivot: **notebook + browser demo, live
-pitch, free Colab/Kaggle only, browser-only workstations.**
+pitch, free Kaggle/Colab only.**
 
 ## Artifacts
 
 | Artifact | Where | What judges see |
 |---|---|---|
-| Twin notebook | `notebooks/twin_demo.ipynb` (Colab, CPU is fine) | 18 green invariant tests, layer stack build, layer separation, 30-day time-sample replay + scrub, farm map, optional scan composition |
-| GPU notebook | `notebooks/gs_scan.ipynb` (Colab, T4) | Real 3DGS training (~7k iters, PSNR printed), flythrough mp4, `scan.ply` export |
-| Browser viewer | `docs/viewer/index.html` (+ `scan.ply` uploaded) via GitHub Pages (branch `main`, folder `/docs`) | Interactive 3D splat on any laptop/phone, honest badge overlay |
-| Backup video | `orbit.mp4` (committed or linked) | Plays even if everything live fails |
+| Twin notebook | `notebooks/twin_demo.ipynb` (Kaggle CPU kernel or Colab) | 20 green invariant tests, layer stack build, layer separation, 30-day time-sample replay + scrub, farm map, scan composition |
+| GPU notebook | `notebooks/gs_scan.ipynb` (Kaggle T4x2 kernel `allankariuki/crop-gs-scan`, or Colab T4) | Real 3DGS training (7k iters, PSNR), orbit `orbit.mp4` render, `scan.ply` + `scan_viewer.ply` + `farm_scan.usda` export |
+| Browser viewer | `docs/viewer/index.html` + `scan.ply` (committed) - serve locally (`python -m http.server`) or GitHub Pages if the repo ever goes public | Interactive 3D splat, honest badge overlay |
+| Backup video | `docs/viewer/orbit.mp4` (committed) | Plays even if everything live fails |
+| USD scan asset | `assets/farm_scan.usda` (committed, from the real run) | The 3DGS output as OpenUSD, composing into the twin headless |
 | Decision record | `docs/04` | Verification log, decisions, risk register, claims ledger |
+
+## How the demo was produced (reproducible)
+
+1. Kaggle dataset `allankariuki/3dcrop-twin-src` = clean `git archive` of
+   `pivot` + py311 wheels (offline pip insurance).
+2. Kaggle kernel `allankariuki/crop-gs-scan` (T4 x2, internet ON) runs
+   `notebooks/gs_scan.ipynb`: clone INRIA repo `--recursive`, compile the three
+   CUDA extensions, download `tandt_db.zip` (COLMAP poses included), train
+   `truck` 7k iters, render the orbit from training cameras sorted by azimuth,
+   convert via `scan_io` to `farm_scan.usda`, cap `scan_viewer.ply` to 150k
+   splats.
+3. Kaggle kernel `allankariuki/crop-twin-demo` (CPU) attaches the scan kernel's
+   output as a data source (`kernel_sources`) and runs `notebooks/twin_demo.ipynb`
+   end-to-end - zero manual upload steps.
+4. Kernel outputs are downloaded, verified structurally (point counts, extents,
+   PSNR), and committed to this repo (viewer PLY + mp4 + metrics + USD asset).
+
+Same notebooks run unchanged on free Colab if Kaggle is unavailable.
 
 ## Run of show (~10 min)
 
@@ -23,9 +42,10 @@ pitch, free Colab/Kaggle only, browser-only workstations.**
    show the two layer files side by side ("definitions live here, live values
    there - wipe one, the other survives") -> replay -> scrub table (day 42 vs
    55 vs 67 - same stage, no reload). This is the architecture story.
-3. **4:30-7:30 GPU notebook (pre-trained before the pitch, rerun 7k live only
-   if the venue is brave).** Show PSNR lines + orbit.mp4 generation. "Trained
-   on a free T4 in under 20 minutes - the same pipeline a drone capture feeds."
+3. **4:30-7:30 GPU kernel.** Show the completed Kaggle kernel page (logs, PSNR)
+   + `orbit.mp4`. "Trained on a free T4 in under 20 minutes - the same
+   pipeline a drone capture feeds. The PLY converts to OpenUSD and composes
+   into the twin."
 4. **7:30-9:30 Browser viewer** on a phone: interactive splat. Badge on screen
    says exactly what is real (public capture PoC) - credibility beats bluff.
 5. **9:30-10:00 Roadmap:** Kit/RTX runtime (post-hackathon), AWS IoT Core
@@ -34,26 +54,34 @@ pitch, free Colab/Kaggle only, browser-only workstations.**
 
 ## Pre-pitch checklist (T-60 min)
 
-- [ ] `pivot` branch **merged into `main`** (GitHub web UI: PR `pivot` -> `main`,
-      merge). Pages and the notebooks' default clone both follow `main`.
-- [ ] Repo pushed to `main` (notebooks, viewer page, docs).
-- [ ] GitHub Pages enabled: Settings > Pages > Deploy from branch `main`,
-      folder `/docs`. Viewer URL:
-      `https://only1allan.github.io/3d_crop_Intelligence-v0/viewer/`
-- [ ] `scan.ply` (<100 MB) uploaded to `docs/viewer/` via GitHub web UI.
-- [ ] Twin notebook ran end-to-end once today; outputs left in place.
-- [ ] gs notebook: training done once, `orbit.mp4` downloaded and committed;
-      PLY size checked.
-- [ ] Offline fallback bundle on the pitch laptop: `orbit.mp4` + `farm_map.png`
-      + a PDF export of the scrub-table cell output.
+- [x] Notebooks hardened against current gaussian-splatting HEAD
+      (`--recursive`, `--test_iterations`, `--disable_viewer`, new log format).
+- [x] `scan_io` numpy fast-path fixed + equivalence test (21 tests green).
+- [x] GPU run completed on Kaggle; artifacts verified + committed
+      (see `docs/viewer/metrics.json` for PSNR).
+- [x] Twin kernel ran end-to-end on Kaggle; outputs on the kernel page.
+- [x] `orbit.mp4` + viewer PLY committed under `docs/viewer/`.
+- [ ] On the pitch laptop: `cd docs/viewer && python -m http.server 8000`
+      -> `http://localhost:8000` (serves the interactive viewer; file:// will
+      NOT work due to module CORS).
+- [ ] Phone loads the viewer from the laptop IP on venue Wi-Fi/hotspot.
+
+## Hosting note (Pages)
+
+GitHub Pages is **not available**: the repo is private and the account is on
+the GitHub Free plan (Pages API returns 404). Options if a public URL is
+wanted: make the repo public (one API call - content was scanned clean), use
+GitHub Pro, or upload the PLY to <https://supersplat.playcanvas.com> for a
+hosted share link. The live demo does not depend on any of these.
 
 ## Fallback ladder
 
 | Failure | Fallback |
 |---|---|
-| Colab cold-start slow at pitch time | pre-run notebook with outputs + orbit.mp4 |
-| No T4 granted today | Kaggle P100/T4x2, or show pre-trained run + logs |
-| Pages viewer broken in venue browser | mp4 + SuperSplat share link (upload PLY at supersplat.playcanvas.com) || Judge asks for sensor data | claims ledger (docs/04 §10): schema supports, values are synthetic, IoT is Phase 2 - never bluff |
+| Venue Wi-Fi dead | offline bundle: `orbit.mp4` + `farm_map.png` + scrub-table screenshots |
+| Viewer heavy on venue hardware | `orbit.mp4` (committed) or SuperSplat share link |
+| Kaggle quota exhausted at pitch time | Colab T4 - same notebooks, no edits |
+| Judge asks for sensor data | claims ledger (docs/04 §10): schema supports, values are synthetic, IoT is Phase 2 - never bluff |
 
 ## Hard pushbacks (do not do these at the venue)
 
